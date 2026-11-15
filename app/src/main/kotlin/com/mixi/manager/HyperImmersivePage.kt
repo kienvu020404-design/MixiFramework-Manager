@@ -2,7 +2,6 @@
 // Time-entry UX adapted from HMC-Enhanced ExtensionsPage.kt StandbyTimeRow.
 package com.mixi.manager
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,13 +10,16 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.awaitCancellation
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -41,7 +43,8 @@ internal fun standbySeconds(text:String,minutes:Boolean,maximum:Int):Int? {
 }
 
 @Composable internal fun HyperImmersivePage(store:UiStore){
-    val context=LocalContext.current
+    val lifecycle=LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(store.connected,lifecycle){if(store.connected)lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED){store.refreshImmersive();awaitCancellation()}}
     val enabled=store.values["immersive.enabled"]=="true"
     val fields=store.byPage["immersive"].orEmpty()
     Row(Modifier.fillMaxWidth().padding(horizontal=12.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceBetween){

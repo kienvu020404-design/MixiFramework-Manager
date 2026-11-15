@@ -40,9 +40,10 @@ public final class ManagerBridge {
                                     if (!saved.edit().putString(key,value).commit()) throw new IllegalStateException("Configuration not saved");
                                     EnhancedProtocol.changed(app,saved,key,value);
                                 }
-                            } else if ("preview".equals(op)) ImmersiveClient.call(app,"preview",null);
-                            else EnhancedProtocol.replay(app,saved);
-                            reply = snapshot(app,saved,"query".equals(op)); code = 1;
+                            } else if ("applyExtensions".equals(op)) applyExtensions(app,saved);
+                            else if ("preview".equals(op)) ImmersiveClient.call(app,"preview",null);
+                            else if ("query".equals(op)) EnhancedProtocol.replay(app,saved);
+                            reply = snapshot(app,saved,"immersiveQuery".equals(op)); code = 1;
                             }
                         } catch (Exception failure) {
                             reply = new Bundle(); reply.putString("error",failure.getClass().getSimpleName()); code = -1;
@@ -58,12 +59,33 @@ public final class ManagerBridge {
         attached = true;
     }
     static void validate(String op,String key,String value) {
-        if ("query".equals(op) || "preview".equals(op) || "previewAssets".equals(op)) return;
+        if ("query".equals(op) || "preview".equals(op) || "previewAssets".equals(op) || "immersiveQuery".equals(op) || "applyExtensions".equals(op)) return;
         if (!"change".equals(op) || key == null || value == null) throw new IllegalArgumentException("Invalid request");
         if (key.equals("enhanced.master") && (value.equals("true") || value.equals("false"))) return;
         for (EnhancedCatalog.Field field : EnhancedCatalog.FIELDS)
             if (field.key.equals(key) && field.accepts(value)) return;
         throw new IllegalArgumentException("Unknown setting/value");
+    }
+    private static void applyExtensions(Context app,android.content.SharedPreferences saved) throws Exception {
+        // Run after the existing drain, including its failure path, before reloading SystemUI.
+        final long deadline=SystemClock.elapsedRealtime()+5500;
+        java.util.concurrent.Future<?> action=EnhancedProtocol.worker.submit(() -> {
+            for(String key:new String[]{"appearance.solidBattery","appearance.ccBatteryPercent"}) {
+                if(SystemClock.elapsedRealtime()>=deadline)throw new IllegalStateException("Apply expired");
+                if(!saved.contains(key))continue;
+                String value=saved.getString(key,"false");
+                validate("change",key,value);
+                Bundle edit=new Bundle();edit.putString("key",key.substring(11));edit.putString("value",value);
+                Bundle reply=app.getContentResolver().call(Uri.parse("content://com.mixi.host.master"),"appearance",null,edit);
+                if(reply==null||!reply.getBoolean("saved"))throw new IllegalStateException("Extension save failed");
+            }
+            if(SystemClock.elapsedRealtime()>=deadline)throw new IllegalStateException("Apply expired");
+            BroadcastOptions options=BroadcastOptions.makeBasic();options.setShareIdentityEnabled(true);
+            app.sendBroadcast(new Intent("com.mixi.host.MASTER_RELOAD").setPackage("com.android.systemui")
+                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),null,options.toBundle());
+        });
+        try{action.get(6,java.util.concurrent.TimeUnit.SECONDS);}
+        catch(java.util.concurrent.TimeoutException expired){action.cancel(false);throw expired;}
     }
     private static Bundle previewAssets(Context app) throws Exception {
         Bundle result=new Bundle();
@@ -111,10 +133,6 @@ public final class ManagerBridge {
                 if (actual != null && field.accepts(String.valueOf(actual))) values.putString(field.key,String.valueOf(actual));
             }
         } catch (Exception unavailable) { result.putBoolean("immersiveUnavailable",true); }
-        if (probe) try {
-            Bundle hmc = HmcProtocol.send(app,"query",null).data;
-            result.putBoolean("hmcAlive",hmc != null && hmc.getBoolean("alive"));
-        } catch (Exception unavailable) { result.putBoolean("hmcAlive",false); }
         result.putBundle("values",values); result.putBoolean("pending",pending);
         return result;
     }

@@ -6,29 +6,19 @@ import androidx.compose.ui.layout.findRootCoordinates
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.awaitCancellation
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.blur.*
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable internal fun SoftGlassPage(store:UiStore){
     val controls=store.byPage["appearance"].orEmpty()
@@ -36,7 +26,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
     fun current(key:String):String= drafts[key]?:store.values[key]?:controls.first{it.key==key}.initial
     fun amount(key:String,max:Float)=current(key).toFloatOrNull()?.coerceIn(0f,max)?:0f
     val enabled=store.values["appearance.enabled"]=="true"
-    LaunchedEffect(store.connected){if(store.connected)store.loadPreview()}
+    val lifecycle=LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(store.connected,lifecycle){if(store.connected)lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED){store.loadPreview();awaitCancellation()}}
     Group("Soft Glass"){controls.filter{it.kind=="bool"}.forEach{OptionRow(it,store)}}
     GlassSample(store,enabled,amount("appearance.blur",100f),amount("appearance.background",200f),
         amount("appearance.opacity",100f),amount("appearance.reflection",200f))

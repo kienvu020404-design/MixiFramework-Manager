@@ -1,8 +1,6 @@
 package com.mixi.manager
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -66,9 +64,7 @@ class UiStore(private val context:Context,private val scope:CoroutineScope) {
     fun value(option:Option)=values[option.key]?:option.initial
     var connected by mutableStateOf(false);private set
     var previewAssets by mutableStateOf(android.os.Bundle());private set
-    fun loadPreview(){if(connected)scope.launch{mutex.withLock{try{previewAssets=hostRequest(context,"previewAssets")}catch(failure:Exception){if(failure is CancellationException&&failure !is TimeoutCancellationException)throw failure;previewAssets=android.os.Bundle()}}}}
-    var hmcAlive by mutableStateOf(false);private set
-    var message by mutableStateOf(if(BuildConfig.HOST_INTEGRATED)"Đang kết nối Settings…" else "Bản xem trước · Chưa kết nối framework");private set
+    suspend fun loadPreview(){if(connected)mutex.withLock{try{previewAssets=hostRequest(context,"previewAssets")}catch(failure:Exception){if(failure is CancellationException&&failure !is TimeoutCancellationException)throw failure;previewAssets=android.os.Bundle()}}}
     var immersive by mutableStateOf(android.os.Bundle());private set
     private val mutex=Mutex()
     private val pending=linkedMapOf<String,String>()
@@ -77,15 +73,25 @@ class UiStore(private val context:Context,private val scope:CoroutineScope) {
     private fun accept(reply:android.os.Bundle){
         val state=reply.getBundle("values")?:throw IllegalStateException("Thiếu cấu hình Host")
         for(key in state.keySet())state.getString(key)?.let{confirmed[key]=it;if(!pending.containsKey(key))values[key]=it}
-        if(reply.containsKey("hmcAlive"))hmcAlive=reply.getBoolean("hmcAlive")
         if(reply.containsKey("immersive"))immersive=reply.getBundle("immersive")?:android.os.Bundle()
         connected=true
-        message=if(reply.getBoolean("pending"))"Đã lưu · Có cấu hình chờ runtime xác nhận" else "Đã kết nối cầu nối cấu hình của Settings"
     }
-    fun refresh(){if(BuildConfig.HOST_INTEGRATED)scope.launch{
-        mutex.withLock{try{accept(hostRequest(context,"query"))}catch(failure:Exception){if(failure is CancellationException&&failure !is TimeoutCancellationException)throw failure;connected=false;message="Chưa kết nối Settings · Mở lại từ Cài đặt → Mixi Framework"}}
+    private var refreshing:Job?=null
+    fun stopReads(){refreshing?.cancel()}
+    fun refresh(){if(BuildConfig.HOST_INTEGRATED){refreshing?.cancel();refreshing=scope.launch{
+        mutex.withLock{try{accept(hostRequest(context,"query"))}catch(failure:Exception){if(failure is CancellationException&&failure !is TimeoutCancellationException)throw failure;connected=false}}
+    }}}
+    fun preview(){if(connected)scope.launch{mutex.withLock{try{accept(hostRequest(context,"preview"))}catch(failure:Exception){if(failure is CancellationException&&failure !is TimeoutCancellationException)throw failure;android.widget.Toast.makeText(context,"Không mở được StandBy",android.widget.Toast.LENGTH_SHORT).show()}}}}
+    suspend fun refreshImmersive(){if(connected)mutex.withLock{
+        try{accept(hostRequest(context,"immersiveQuery"))}catch(failure:Exception){if(failure is CancellationException&&failure !is TimeoutCancellationException)throw failure;immersive=android.os.Bundle()}
     }}
-    fun preview(){if(connected)scope.launch{mutex.withLock{try{accept(hostRequest(context,"preview"))}catch(failure:Exception){if(failure is CancellationException&&failure !is TimeoutCancellationException)throw failure;message="HyperImmersive chưa mở được bản xem trước"}}}}
+    var applyingExtensions by mutableStateOf(false);private set
+    fun applyExtensions(){if(!connected||applyingExtensions)return
+        applyingExtensions=true
+        scope.launch{try{mutex.withLock{accept(hostRequest(context,"applyExtensions"))}}
+            catch(failure:Exception){if(failure is CancellationException&&failure !is TimeoutCancellationException)throw failure;android.widget.Toast.makeText(context,"Chưa áp dụng được. Thử lại khi kết nối Settings.",android.widget.Toast.LENGTH_LONG).show()}
+            finally{applyingExtensions=false}}
+    }
     fun set(key:String,value:String){
         if(!BuildConfig.HOST_INTEGRATED||key.startsWith("manager.")){
             values[key]=value;preferences.edit().putString(key,value).apply();return
@@ -103,7 +109,7 @@ class UiStore(private val context:Context,private val scope:CoroutineScope) {
                 }catch(failure:Exception){
                     if(failure is CancellationException&&failure !is TimeoutCancellationException)throw failure
                     pending.clear();confirmed.forEach{(k,v)->values[k]=v}
-                    connected=false;message="Chưa xác nhận lưu · Mở lại từ Cài đặt để kết nối lại"
+                    connected=false
                 }
             }
         }}
@@ -145,15 +151,16 @@ class MainActivity:ComponentActivity(){
                     isAppearanceLightNavigationBars=!dark
                 }
             }
-            MiuixTheme(colors=if(dark)darkColorScheme() else lightColorScheme()){Manager(store,this)}
+            MiuixTheme(colors=if(dark)darkColorScheme() else lightColorScheme()){Manager(store)}
         }
     }
     override fun onResume(){super.onResume();if(::store.isInitialized)store.refresh()}
+    override fun onStop(){if(::store.isInitialized)store.stopReads();super.onStop()}
 }
 
 private data class Screen(val route:String):NavKey
 
-@Composable private fun Manager(store:UiStore,context:Context){
+@Composable private fun Manager(store:UiStore){
     var tab by rememberSaveable{mutableIntStateOf(0)}
     val rootPager=rememberPagerState(initialPage=tab,pageCount={3})
     val focus=LocalFocusManager.current
@@ -170,7 +177,7 @@ private data class Screen(val route:String):NavKey
         entry<Screen>{screen->
     val pageStates=rememberSaveableStateHolder()
     val detail=screen.route.takeUnless{it=="root"}.orEmpty()
-    val title=if(detail.isEmpty())listOf("Mixi Framework","Tính năng","Thông tin")[tab] else if(detail=="hmc")"HyperMusicCover Enhanced" else pages[detail]?:"Mã nguồn & Ghi nhận"
+    val title=if(detail.isEmpty())listOf("Mixi Framework","Tính năng","Thông tin")[tab] else if(detail=="hmc")"HyperMusicCover Enhanced" else pages[detail]?:"Ghi nhận & Giấy phép"
     val surface=MiuixTheme.colorScheme.surface
     val backdrop=rememberLayerBackdrop{drawRect(surface);drawContent()}
     val tabScrolls=(0..2).map{index->key(screen,index){MiuixScrollBehavior(canScroll={detail.isEmpty()&&tab==index&&!rootPager.isScrollInProgress})}}
@@ -248,9 +255,8 @@ private data class Screen(val route:String):NavKey
                         Group("Giao diện"){
                             GlassDropdownPreference(items=listOf("Theo hệ thống","Sáng","Tối"),selectedIndex=(store.values["manager.theme"]?:"0").toInt(),title="Chế độ màu",onSelectedIndexChange={store.set("manager.theme",it.toString())})
                         }
-                        Group("Dự án"){
-                            ArrowPreference(title="Mã nguồn Manager",summary="GitHub · Kien Vu",onClick={context.startActivity(Intent(Intent.ACTION_VIEW,Uri.parse("https://github.com/kienvu020404-design/MixiFramework-Manager")))})
-                            ArrowPreference(title="Mã nguồn mở & Ghi nhận",onClick={open("credits")})
+                        Group("Ghi nhận"){
+                            ArrowPreference(title="Ghi nhận & Giấy phép",onClick={open("credits")})
                         }
                     }
                     "hmc"->{
@@ -274,6 +280,7 @@ private data class Screen(val route:String):NavKey
                     else->{
                         PreviewNote(store)
                         if(route=="island")IslandDemo(colorOs=(store.values["mini.pillStyle"]?:"0")=="0")
+                        if(route=="extensions")Card{BasicComponent(title=if(store.applyingExtensions)"Đang áp dụng…" else "Áp dụng",summary="Khởi động lại SystemUI để nạp các tùy chọn pin. Giữ nguyên cấu hình đã lưu.",enabled=store.connected&&!store.applyingExtensions,onClick={store.applyExtensions()})}
                         val controls=store.byPage[route].orEmpty()
                         controls.groupBy { option ->
                             when(route){

@@ -87,3 +87,16 @@ extension=(out/"SettingsExtension.java").read_text(encoding="utf-8")
 assert 'Method open=null;' not in extension
 assert 'if(!"ALREADY_PLACED".equals(result))' in extension
 print("PREVIEW_LIFECYCLE_IDENTITY_THEME_ENTRY_SOURCE_CONTRACT_PASS (device acceptance pending)")
+
+assert 'title="Mã nguồn Manager"' not in main and 'Intent.ACTION_VIEW' not in main
+assert 'var message by' not in main and 'hmcAlive' not in main
+assert 'HmcProtocol.send(app,"query"' not in bridge
+assert 'snapshot(app,saved,"immersiveQuery".equals(op))' in bridge
+assert 'title=if(store.applyingExtensions)' in main and 'store.applyExtensions()' in main
+assert 'action.cancel(false)' in bridge and 'Apply expired' in bridge
+island=(manager/"app/src/main/kotlin/com/mixi/manager/IslandDemo.kt").read_text(encoding="utf-8")
+assert 'if(visible&&lifecycle.currentState.isAtLeast' in island
+assert 'if(it.drawable !== drawable)' in island
+assert 'suspend fun loadPreview()' in main and 'fun stopReads()' in main
+assert 'repeatOnLifecycle(Lifecycle.State.RESUMED)' in preview
+print("NO_SOURCE_LINK_NO_UNUSED_PROBE_APPLY_AND_READ_LIFECYCLE_SOURCE_PASS")

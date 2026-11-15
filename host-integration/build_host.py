@@ -28,7 +28,7 @@ for name,expected in json.loads((manager/'host-integration/framework-inputs.json
     assert sha((root/name).read_bytes())==expected,'Framework source input changed: '+name
 ui=manager/'app/build/outputs/apk/release/app-release.apk'
 badging=subprocess.check_output([str(sdk/'aapt2.exe'),'dump','badging',str(ui)],text=True,encoding='utf-8')
-assert "name='com.mixi.host'" in badging and "versionName='0.9.3-host-ui'" in badging,'Build with -PhostUi=true first'
+assert "name='com.mixi.host'" in badging and "versionName='0.9.4-host-ui'" in badging,'Build with -PhostUi=true first'
 resources=subprocess.check_output([str(sdk/'aapt2.exe'),'dump','resources',str(ui)],text=True,encoding='utf-8')
 assert 'id=80' in resources or 'id=0x80' in resources,'UI resource IDs must be isolated from original 0x7f'
 run(java/'java.exe','-jar',sdk/'lib/apksigner.jar','verify',ui)
@@ -91,10 +91,10 @@ parts['META-INF/mixi/modules/settings.jar']=settings.read_bytes()
 pin='META-INF/mixi/pins/settings.properties'
 metadata=dict(line.split('=',1) for line in parts[pin].decode().splitlines() if '=' in line)
 metadata['extensionSha256']=sha(settings.read_bytes())
-metadata['buildId']='host-ui-0.9.0-test'
+metadata['buildId']='host-ui-0.9.4-test'
 parts[pin]=''.join(k+'='+v+'\n' for k,v in metadata.items()).encode()
 manifest=(root/'out/v104/AndroidManifest.xml').read_text(encoding='utf-8')
-manifest=manifest.replace('100400','100404').replace('android:versionName="1.0.4"','android:versionName="1.0.4-ui-test"')
+manifest=manifest.replace('100400','100405').replace('android:versionName="1.0.4"','android:versionName="1.0.4-ui-test"')
 manifest=manifest.replace('<application ','<application android:appComponentFactory="mixi.host.ui.HostUiFactory" android:allowBackup="false" ')
 manifest=manifest.replace('</application>','<activity android:name="com.mixi.manager.MainActivity" android:exported="true" android:process=":manager" android:theme="@android:style/Theme.Material.NoActionBar" /></application>')
 (out/'AndroidManifest.xml').write_text(manifest,encoding='utf-8')

@@ -6,7 +6,7 @@ android {
  buildToolsVersion = "37.0.0"
  defaultConfig {
   applicationId = if(hostUi) "com.mixi.host" else "com.mixi.manager"
-  minSdk = 35; targetSdk = 37; versionCode = 18; versionName = "0.9.3-host-ui"
+  minSdk = 35; targetSdk = 37; versionCode = 19; versionName = "0.9.4-host-ui"
   buildConfigField("boolean", "HOST_INTEGRATED", hostUi.toString())
  }
  if(hostUi) androidResources { additionalParameters += listOf("--package-id", "0x80") }

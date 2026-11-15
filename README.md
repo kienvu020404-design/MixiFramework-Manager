@@ -72,3 +72,6 @@ Current test adds a green connection check and removes routine saved/runtime not
 
 ## 0.9.3 test
 Current test corrects light-mode card contrast and tick inset, reduces redundant preview bitmap/native updates, disables preview Glass when offscreen/paused, and removes the unused native-panel lookup from the Mixi Settings hook. No original Settings APK changes. Before-only scroll/launch measurements: host-integration/BENCHMARK.json. After-install comparison is pending; do not treat source changes as measured speed gains.
+
+## 0.9.4 review / Extensions Apply
+Project-source UI link removed; license credits retained. No unused Home HMC/Immersive status probes, page reads and original Island animation follow visibility/lifecycle. Important error logs and validation remain. Extensions has an Apply action for the battery controls: it saves current values and uses the existing SystemUI reload only on user click; Glass remains live. See host-integration/REVIEW-094.md and verification for tests/limits. No phone installation or runtime acceptance is claimed for0.9.4.

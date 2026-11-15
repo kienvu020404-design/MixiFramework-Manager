@@ -57,3 +57,6 @@ Remove status card8dp horizontal inset, raise minimum height156 to164dp. Phone s
 
 ## 0.9.3 theme, scroll and Settings work
 Tick inset16dp and circle stroke inside its Canvas. Connected card selects light green/dark green text or dark green/light text based on the active Miuix surface, including app theme override. Reuse identical wallpaper bitmap; apply native configuration only when its key changes. Native Glass is inactive outside the window viewport or below RESUMED; lifecycle observer is removed on disposal. No polling or reduced visible blur quality. Remove obsolete native-panel reflection search from generated SettingsExtension, keep trusted loading/navigation; skip routine ALREADY_PLACED log. No OEM APK/ART/compiler filter changes. BENCHMARK.json contains before metrics; post093 is pending manual installation.
+
+## 0.9.4 review and Apply
+Remove project GitHub link, keep attribution under Ghi nhận & Giấy phép. Stop unused status probes and offscreen Island animation; scope preview/Immersive reads to RESUMED page lifecycle. Retain serialized writes and validation. Extensions Apply explicitly describes SystemUI reload, serializes after pending drain, flushes current battery booleans and prevents reload after save failure/expiry. No Apply on Glass. Local transport fixtures pass; phone acceptance pending.

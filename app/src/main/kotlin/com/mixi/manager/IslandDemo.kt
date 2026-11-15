@@ -10,6 +10,9 @@ import android.widget.ImageView
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -26,18 +29,20 @@ import top.yukonga.miuix.kmp.basic.Card
     val drawable by produceState<Drawable?>(null,id){
         value=withContext(Dispatchers.Default){ImageDecoder.decodeDrawable(ImageDecoder.createSource(resources,id))}
     }
+    var visible by remember{mutableStateOf(true)}
     val lifecycle=LocalLifecycleOwner.current.lifecycle
-    DisposableEffect(drawable,lifecycle){
+    DisposableEffect(drawable,lifecycle,visible){
         val animated=drawable as? AnimatedImageDrawable
-        fun update(){if(lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))animated?.start() else animated?.stop()}
+        fun update(){if(visible&&lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))animated?.start() else animated?.stop()}
         animated?.repeatCount=AnimatedImageDrawable.REPEAT_INFINITE
         val observer=LifecycleEventObserver{_,_->update()}
         lifecycle.addObserver(observer);update()
         onDispose{lifecycle.removeObserver(observer);animated?.stop()}
     }
     Card{
-        AndroidView(modifier=Modifier.fillMaxWidth().height(112.dp),
+        AndroidView(modifier=Modifier.fillMaxWidth().height(112.dp).onGloballyPositioned{val b=it.boundsInWindow();visible=b.height>0f&&b.bottom>0f&&b.top<it.findRootCoordinates().size.height},
             factory={ImageView(it).apply{scaleType=ImageView.ScaleType.FIT_CENTER;contentDescription="Demo Island ${if(colorOs)"ColorOS" else "HyperOS"}"}},
-            update={it.setImageDrawable(drawable)})
+            onReset=null,onRelease={(it.drawable as? AnimatedImageDrawable)?.stop();it.setImageDrawable(null)},
+            update={if(it.drawable !== drawable)it.setImageDrawable(drawable)})
     }
 }
