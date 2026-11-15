@@ -25,3 +25,6 @@ User requires the sample immediately below the Soft Glass master switch. Final o
 
 ## 0.7 undimmed dropdown glass
 User reference: anchored dropdown with translucent blurred material and soft rounded corners, no dark veil over the page. All choice controls and theme selector use one shared helper. Reuse original Miuix OverlayListPopup (enableWindowDim=false), ListPopupColumn measurement/scroll, DropdownImpl check/radio semantics, native haptics and animation. The popup host alone clears its default opaque surface; page/root theme stays unchanged. Blur samples the page LayerBackdrop, 28dp clip plus thin highlight border, adaptive popup height. Flat surface fallback when no backdrop exists. Not a SystemUI Glass hook or exact OEM material parity claim. Physical appearance/accessibility interaction still pending on phone.
+
+## 0.7.1 popup corrections
+Add10dp gap between trailing value and arrow. Put original Miuix DropdownImpl rows under one full-width scroll Column with propagated minimum row constraints; clip each highlight to22dp corners and6dp side inset, retain28dp popup. Disable only popup texture noiseCoefficient; underlying Miuix blur pipeline remains Gaussian-based. No new shader or global dim added. Phone visual verification pending.
