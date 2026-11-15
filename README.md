@@ -1,6 +1,6 @@
 # Mixi Framework Manager
 
-Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA**, pinned to 0.9.4. Android15+ / targetAndroid17. Package `com.mixi.manager`, UI milestone `0.4.0-ui`.
+Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA**, pinned to 0.9.4. Android15+ / targetAndroid17. Package `com.mixi.manager`, UI milestone `0.5.0-ui`.
 
 ## Implemented
 
@@ -8,7 +8,7 @@ Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA*
 - Progressive TopAppBar blur from the original Miuix effects, content drawn behind bars, transparent gesture navigation with contrast scrim disabled.
 - Compact honest connection-state card; original Miuix NavDisplay detail navigation animates complete pages, and root tabs use a neighbor-retaining HorizontalPager.
 - Floating-tab motion uses Miuix Folme spring instead of a fixed-duration tween; rapid retargeting still settles at the selected tab.
-- Catalog metadata is generated into Kotlin before build, avoiding JSON asset parsing on startup; page groups are indexed once. Splash/window colors follow the system light/dark theme.
+- Catalog metadata is generated into Kotlin before build, avoiding JSON asset parsing on startup; page groups are indexed once. No branded splash/logo animation or separate splash Activity. Day/night themes disable the starting-window preview and use a transparent icon fallback; a cold start still waits for Android and the first rendered app frame.
 - Release builds enable R8 and resource shrinking. Use the optimized release preview for performance evaluation; it is signed with the same debug key for easy preview upgrades, not a production security identity.
 - Home ROM/device/Android/kernel facts, feature shortcuts, honest disconnected state.
 - Searchable92-field catalog across10groups: HMC Enhanced subpages, Soft Glass and extensions.
@@ -17,7 +17,7 @@ Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA*
 
 ## Boundary
 
-This milestone is **UI only**. Changes persist in Manager preferences and do not apply to the installed framework. There is no root request, native hook engine, permanent service or privileged configuration transport. The existing framework, Settings entry and HMC optimizations are untouched. Signed Manager access/config migration and opening the Manager from HyperOS Settings are future integration work, not implemented here. The UI never reports a fabricated framework-active status. Secret API entry is intentionally deferred until secure connected configuration exists.
+This milestone is **UI only**. Changes persist in Manager preferences and do not apply to the installed framework. There is no root request, native hook engine, permanent service or privileged configuration transport. The existing framework, Settings entry and HMC optimizations are untouched. Removing the splash does not itself implement Settings-to-Manager integration. Signed Manager access/config migration and opening the Manager from HyperOS Settings are future integration work, not implemented here. The UI never reports a fabricated framework-active status. Secret API entry is intentionally deferred until secure connected configuration exists.
 
 ## Build
 

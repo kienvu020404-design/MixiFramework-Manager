@@ -13,3 +13,6 @@ Original miuix-nav NavDisplay/MiuixDefault animates complete detail pages includ
 
 ## 0.4 motion/startup revision
 Use original Miuix Folme spring for floating-tab pager: damping .95, response .4seconds, .5px settlement threshold; keep neighbor pages and latest-selection cancellation. Generate immutable catalog metadata during development/build preparation to eliminate startup asset JSON read/parse, retaining the source catalog contract and indexed page lookup. SharedPreferences load remains; no claim that every disk read is removed. Splash window follows system day/night without extra startup Activity. No background preload service, framework writes or hook changes. Physical startup/frame measurements deferred at user request.
+
+## 0.5 unbranded launch
+User wants entry from HyperOS Settings to feel like opening a settings page, not a standalone branded app launch. Both day/night themes set windowDisablePreview=true, empty vector splash icon and zero icon animation duration; preserve normal opaque Activity and edge-to-edge behavior. Launcher icon unchanged; no separate splash Activity, delay, keep condition or extra startup service. This controls branding/preview, not cold-start latency or every OEM launch transition; actual Settings integration remains a separate pending task.

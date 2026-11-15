@@ -22,3 +22,11 @@ before=generated.read_bytes()
 subprocess.run([sys.executable,str(root/'scripts/generate_catalog.py')],check=True)
 assert generated.read_bytes()==before, 'Compiled catalog was stale; rebuild after regeneration'
 print('COMPILED_CATALOG_MATCHES_SOURCE_PASS')
+
+for variant in ('values','values-night'):
+ theme=ET.parse(root/f'app/src/main/res/{variant}/theme.xml').getroot()
+ attributes={item.attrib['name']:item.text for item in theme.findall('.//item')}
+ assert attributes['android:windowDisablePreview']=='true'
+ assert attributes['android:windowSplashScreenAnimatedIcon']=='@drawable/empty_startup_icon'
+ assert attributes['android:windowSplashScreenAnimationDuration']=='0'
+print('NO_BRANDED_STARTING_WINDOW_THEME_PASS day/night')

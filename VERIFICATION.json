@@ -1,12 +1,10 @@
 {
-  "version": "0.4.0-ui",
+  "version": "0.5.0-ui",
   "package": "com.mixi.manager",
-  "sha256": "8d8f9993691b7480be32bb1cc8ef4338362c6f883d383f8568d1a01c159e6383",
-  "variant": "R8 optimized release, same preview debug signing for upgrades",
-  "checks": "assembleRelease/lintRelease0errors3warnings/signature/package/ZIPCRC/catalog92contract+compiledmetadataequivalence PASS",
-  "changes": "Miuix folmeSpring(.95 damping,.4response,.5px threshold) replaces fixed-time tab motion; generated Kotlin catalog removes startup assetJSON IO/parse; byPagecache replaces repeated scans; splashwindow light/night and theme icon consistency",
-  "apk_bytes": 2802344,
-  "scope": "UI/localpreview only; no framework/HMC/hooks/background preload service changes",
-  "startup_limits": "SharedPreferencesinitialread retained; do not claim mainthreadallIOremoved or fastestpossible without traces",
-  "device": "user deferred ADBtest; cold/warmstart andframepacing not measured; smoothermotion pendingvisualacceptance"
+  "sha256": "947b5a251c9a9895da23601282ef6cfed133d0383985012344d66663f03550f3",
+  "variant": "optimized release,previewdebugsigningforupgrade",
+  "checks": "assembleRelease/lintRelease0errors3warnings/signature/manifest/ZIPCRC/catalogcompiledcontract/day-nightlaunchthemes PASS",
+  "change": "windowDisablePreviewtrue,transparentSplashicon,zeroiconanimationduration;no separateSplashActivity,delay,translucentwindowhack or launchservice",
+  "unchanged": "launchericon,ManagernavigationFolmespring/blur,UIcontrols/framework/HMC",
+  "device": "userdeferredtests;actualHyperOSSettings->Manager integrationnotimplemented;OEMstartingwindowandcoldfirstdraw not guaranteed instantaneous"
 }
