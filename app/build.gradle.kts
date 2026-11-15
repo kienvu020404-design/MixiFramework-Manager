@@ -3,7 +3,7 @@ android {
  namespace = "com.mixi.manager"
  compileSdk { version = release(37) }
  buildToolsVersion = "37.0.0"
- defaultConfig { applicationId = "com.mixi.manager"; minSdk = 35; targetSdk = 37; versionCode = 6; versionName = "0.6.0-ui" }
+ defaultConfig { applicationId = "com.mixi.manager"; minSdk = 35; targetSdk = 37; versionCode = 7; versionName = "0.6.1-ui" }
  buildFeatures { compose = true; buildConfig = true }
  buildTypes {
   getByName("release") {

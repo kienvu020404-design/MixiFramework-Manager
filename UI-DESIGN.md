@@ -19,3 +19,6 @@ User wants entry from HyperOS Settings to feel like opening a settings page, not
 
 ## 0.6 Soft Glass sample UI
 User explicitly requests layout/preview UI first, exact system appearance later. Add a local static landscape Canvas and rounded sample panel using the existing Miuix blur effect; four local parameters influence blur/tint/highlight illustration. Draft slider values affect only this page during dragging, persisted local values update on release. Clearly label approximate UI/not HyperOS renderer, no framework writes or continuous animation. No image generation/download needed. Phone visual acceptance pending.
+
+## 0.6.1 preview placement correction
+User requires the sample immediately below the Soft Glass master switch. Final order: explanation, master switch, sample, blur controls, material controls. Only layout order changes; preview mappings and local persistence remain unchanged.

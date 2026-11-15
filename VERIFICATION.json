@@ -1,11 +1,9 @@
 {
-  "version": "0.6.0-ui",
+  "version": "0.6.1-ui",
   "package": "com.mixi.manager",
-  "sha256": "3f4c25743adb54d801354b0114ea547ee5f5e3e6d64d0b04a23d88a03b51d175",
-  "variant": "R8optimized release preview",
-  "checks": "assembleRelease/lintRelease0errors3warnings/signature/manifest/CRC/92catalogcontract PASS",
-  "UI": "SoftGlasspage groups blur/master,static scene andsamplepanel,material controls; draftsliderupdatespreviewduringdrag,preferencespersistonrelease; masterOFFrendersneutralpanel",
-  "preview": "Miuix textureBlur and opacity/border illustration only,notHyperOSrenderer/parity; staticlocallydrawnscene,no externalimage/license/network;no infiniteanimation/timer",
-  "scope": "localManagerUI only,systemconfig/hook/HMCunchanged",
-  "device_visual": "not installed/inspected on phone;userdeferredADB,physicalvisualacceptancepending"
+  "sha256": "55c893e02e6210d9840a4a0efeb58e262420685d097af5e5ebcdb6dbe2929fe6",
+  "checks": "assembleRelease/signature/manifest/ZIPCRC/source layout order PASS",
+  "change": "master switch -> sample -> blur controls -> material controls; preview and persistence logic unchanged",
+  "scope": "UIonly,noframework/HMCchange",
+  "device_visual": "pending physical review; approximate preview unchanged,not OEM renderer"
 }

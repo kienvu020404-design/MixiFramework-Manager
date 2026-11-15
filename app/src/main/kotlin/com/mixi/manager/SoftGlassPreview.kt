@@ -31,13 +31,13 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
     val enabled=store.values["appearance.enabled"]=="true"
     Card{BasicComponent(title="Xem trước Soft Glass",summary="Minh họa bố cục và hiệu ứng trong app. Vật liệu HyperOS chính xác và kết nối hệ thống sẽ được hoàn thiện sau.")}
     Group("Soft Glass"){controls.filter{it.kind=="bool"}.forEach{OptionRow(it,store)}}
+    GlassSample(enabled,amount("appearance.blur",100f),amount("appearance.background",200f),
+        amount("appearance.opacity",100f),amount("appearance.reflection",200f))
     Group("Độ mờ"){
         controls.filter{it.key in listOf("appearance.blur","appearance.background")}.forEach{
             OptionRow(it,store){key,value->drafts[key]=value}
         }
     }
-    GlassSample(enabled,amount("appearance.blur",100f),amount("appearance.background",200f),
-        amount("appearance.opacity",100f),amount("appearance.reflection",200f))
     Group("Vật liệu"){
         controls.filter{it.key in listOf("appearance.opacity","appearance.reflection")}.forEach{
             OptionRow(it,store){key,value->drafts[key]=value}
