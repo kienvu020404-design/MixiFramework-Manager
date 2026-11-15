@@ -28,3 +28,6 @@ User reference: anchored dropdown with translucent blurred material and soft rou
 
 ## 0.7.1 popup corrections
 Add10dp gap between trailing value and arrow. Put original Miuix DropdownImpl rows under one full-width scroll Column with propagated minimum row constraints; clip each highlight to22dp corners and6dp side inset, retain28dp popup. Disable only popup texture noiseCoefficient; underlying Miuix blur pipeline remains Gaussian-based. No new shader or global dim added. Phone visual verification pending.
+
+## 0.7.2 consistent menu geometry
+The two-choice screenshot exposed the final row touching the container edge and large per-row rounding. Use uniform8dp list inset including top/bottom,2dp inter-row gap,20dp row clipping under28dp outer surface. Set original DropdownImpl isFirst/isLast=false so every row uses the same12dp vertical padding instead of asymmetric first/last20dp. Preserve originalradio/tick/haptics/popupmotion/fullwidth constraints; no per-page patches. Noise remains off and background remains undimmed. Physical verification still required.

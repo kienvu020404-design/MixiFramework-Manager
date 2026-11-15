@@ -1,6 +1,6 @@
 # Mixi Framework Manager
 
-Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA**, pinned to 0.9.4. Android15+ / targetAndroid17. Package `com.mixi.manager`, UI milestone `0.7.1-ui`.
+Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA**, pinned to 0.9.4. Android15+ / targetAndroid17. Package `com.mixi.manager`, UI milestone `0.7.2-ui`.
 
 ## Implemented
 
@@ -11,7 +11,7 @@ Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA*
 - Catalog metadata is generated into Kotlin before build, avoiding JSON asset parsing on startup; page groups are indexed once. No branded splash/logo animation or separate splash Activity. Day/night themes disable the starting-window preview and use a transparent icon fallback; a cold start still waits for Android and the first rendered app frame.
 - Release builds enable R8 and resource shrinking. Use the optimized release preview for performance evaluation; it is signed with the same debug key for easy preview upgrades, not a production security identity.
 - Home ROM/device/Android/kernel facts, feature shortcuts, honest disconnected state.
-- Shared dropdown menus reuse Miuix popup motion/positioning and radio/check rows with a 28dp rounded translucent blur surface, no full-screen dim, adaptive height and dismiss-on-select/outside/back. Popup texture noise is disabled; item press highlights fill their rows and use rounded clipping with a small inset.
+- Shared dropdown menus reuse Miuix popup motion/positioning and radio/check rows with a 28dp rounded translucent blur surface, no full-screen dim, adaptive height and dismiss-on-select/outside/back. Popup texture noise is disabled; item press highlights fill their rows, with uniform row spacing and an8dp inset on all four sides. First/last rows use the same vertical padding as middle rows.
 - Searchable92-field catalog across10groups: HMC Enhanced subpages, Soft Glass and extensions.
 - Original Miuix switches, overlay dropdowns and sliders with live numbers; slider previews persist on release.
 - System/light/dark themes and preserved page scroll; Mixi logo, about and source credits.

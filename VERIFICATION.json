@@ -1,10 +1,9 @@
 {
-  "version": "0.7.1-ui",
+  "version": "0.7.2-ui",
   "package": "com.mixi.manager",
-  "sha256": "2ace7e60b67fffaa2f4e9510decbebf18e5a7a7e6b883ff570e3bf4abffa18bf",
-  "checks": "assembleRelease/lintRelease0errors3warnings/signature/ZIPCRC/catalogcontract PASS",
-  "changes": "10dp trailinggap beforedropdownarrow;shared fullwidth Column+propagateMinConstraints for each originalMiuixrow;rowhighlightclip22dp inset6dp,popup28dp;noiseCoefficient0 onpopuptextureBlur",
-  "blur": "Miuix Gaussian-based textureBlur,noise disabled onlypopup;not nativeOEMGlass;no claim imagegrain entirelyfixedwithoutphonevisual",
-  "scope": "UIManager only,framework/HMC unchanged",
-  "visual": "pending userpopupspacing/highlightbounds/blur inspection"
+  "sha256": "2c13cdd6ac7e9548461be7d3a0989d0114e36e302a01d876af9016ba3c831d3b",
+  "checks": "assembleRelease/lintRelease0errors3warnings/signature/manifest/CRC/catalogandpopupgeometrypolicy PASS",
+  "changes": "shared8dpinset4sides,2dpverticalgap,20dprowclipwithin28dppopup;originalrow isFirst/isLastfalse -> uniformverticalpadding;fullwidthradio/tickbehavior preserved",
+  "scope": "all choicepopups incltheme viaonehelper;blur/noiseoff/no dimunchanged;no framework/HMCchange",
+  "device": "userphonevisualneeded; not claiming exactOEMpixelparityfrombuild"
 }

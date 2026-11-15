@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -47,11 +48,12 @@ internal val LocalMenuBackdrop=staticCompositionLocalOf<LayerBackdrop?>{null}
                     else Modifier.background(scheme.surfaceContainer,shape)
                 Box(Modifier.widthIn(min=220.dp,max=288.dp).clip(shape).then(material)
                     .border(.5.dp,Brush.linearGradient(listOf(scheme.onSurface.copy(alpha=.14f),Color.Transparent,scheme.onSurface.copy(alpha=.06f))),shape)){
-                    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())){
+                    Column(Modifier.fillMaxWidth().padding(8.dp).verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(2.dp)){
                         items.forEachIndexed{index,label->
-                            Box(Modifier.fillMaxWidth().padding(horizontal=6.dp).clip(RoundedCornerShape(22.dp)),propagateMinConstraints=true){
+                            Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)),propagateMinConstraints=true){
                             DropdownImpl(item=DropdownItem(text=label,selected=index==selectedIndex,onClick={}),
                                 optionSize=items.size,isSelected=index==selectedIndex,index=index,dropdownColors=itemColors,
+                                isFirst=false,isLast=false,
                                 onSelectedIndexChange={haptics.performHapticFeedback(HapticFeedbackType.Confirm);onSelectedIndexChange(index);expanded=false})
                             }
                         }

@@ -30,3 +30,10 @@ for variant in ('values','values-night'):
  assert attributes['android:windowSplashScreenAnimatedIcon']=='@drawable/empty_startup_icon'
  assert attributes['android:windowSplashScreenAnimationDuration']=='0'
 print('NO_BRANDED_STARTING_WINDOW_THEME_PASS day/night')
+
+popup=(root/'app/src/main/kotlin/com/mixi/manager/GlassDropdownPreference.kt').read_text(encoding='utf-8')
+assert '.padding(8.dp).verticalScroll(' in popup
+assert 'isFirst=false,isLast=false' in popup
+assert 'propagateMinConstraints=true' in popup
+assert 'enableWindowDim=false' in popup and 'noiseCoefficient=0f' in popup
+print('CONSISTENT_POPUP_INSETS_AND_ROW_POLICY_PASS')
