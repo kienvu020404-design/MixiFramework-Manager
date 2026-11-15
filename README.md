@@ -1,6 +1,6 @@
 # Mixi Framework Manager
 
-Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA**, pinned to 0.9.4. Android15+ / targetAndroid17. Package `com.mixi.manager`, UI milestone `0.8.3-ui`.
+UI for MixiHost built with Kotlin, Jetpack Compose and **Miuix by YuKongA**, pinned to 0.9.4. Android15+ / targetAndroid17. Milestone `0.9.0-host-ui`: one installed `com.mixi.host` APK; the standalone `com.mixi.manager` build remains a development preview only.
 
 ## Implemented
 
@@ -18,19 +18,23 @@ Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA*
 
 ## Soft Glass preview
 
-The Soft Glass page includes a static locally drawn scene and a Miuix sample panel. The sample sits immediately below the master switch; all blur/background/opacity/reflection sliders follow underneath. Slider drafts update the illustration during dragging, while local preferences save on release. The master switch returns the sample to a neutral panel when off. There is no continuous wallpaper animation or extra network/image dependency.
+The Soft Glass page includes a static locally drawn scene and a Miuix sample panel. The sample sits immediately below the master switch; all blur/background/opacity/reflection sliders follow underneath. Slider drafts update the illustration during dragging, while release sends configuration through Settings in the Host build (or saves local preferences in the standalone preview). The master switch returns the sample to a neutral panel when off. There is no continuous wallpaper animation or extra network/image dependency.
 
-This preview is deliberately a **UI illustration**, not the HyperOS material renderer. Parameters are mapped for visual feedback only and do not promise pixel parity with notifications/Control Center. Exact material rendering and authenticated system configuration remain deferred. Nothing is applied to the framework by this preview.
+This preview is deliberately a **UI illustration**, not the HyperOS material renderer. Parameters are mapped for visual feedback only and do not promise pixel parity with notifications/Control Center. Exact preview material parity remains deferred. In the Host build, slider release sends the real setting through the existing Settings configuration protocol; the illustration itself does not become an OEM renderer.
 
 ## HyperImmersive and Island UI
 
-HyperImmersive has its own page with version/status placeholders, StandBy and blurred-background switches, numeric idle/off fields, seconds/minutes menus anchored to the actual unit button with the same undimmed blur as other choices and a zero-time warning. Times are stored in seconds in the existing local preview keys; invalid inputs are not committed. Preview StandBy remains explicitly unavailable until runtime integration.
+HyperImmersive has its own page with version/status from its bridge when available, StandBy and blurred-background switches, numeric idle/off fields, seconds/minutes menus anchored to the unit button, and a zero-time warning. Host mode uses the existing ImmersiveClient configuration and preview calls through Settings. Standalone preview remains local and disconnected.
 
 Lockscreen SuperIsland uses the original HMC-Enhanced IslandDemo WebP assets, unchanged: choosing ColorOS or HyperOS switches the correct animation. The upstream ImageDecoder/ImageView approach is retained, with decoding off the UI thread and lifecycle-aware start/stop. Assets and source attribution are recorded in NOTICE.md; this is UI demo reuse, not a feature-runtime port.
 
 ## Boundary
 
-This milestone is **UI only**. Changes persist in Manager preferences and do not apply to the installed framework. There is no root request, native hook engine, permanent service or privileged configuration transport. The existing framework, Settings entry and HMC optimizations are untouched. Removing the splash does not itself implement Settings-to-Manager integration. Signed Manager access/config migration and opening the Manager from HyperOS Settings are future integration work, not implemented here. The UI never reports a fabricated framework-active status. Secret API entry is intentionally deferred until secure connected configuration exists.
+The shipped test is one Host APK inside a reversible module. Its Activity runs in `:manager`; original API/HMC DEX, resources, assets and libraries are preserved. The UI is an embedded, checksum-verified private module with resource package `0x80`, loaded with a boot-parent classloader and ResourcesLoader only when opened. There is no second installed Manager APK or launcher icon.
+
+The Settings header opens that Activity and lazily registers a relay restricted to the actual Host sender UID/package. Settings keeps its existing UID1000 authority, catalog validation, pending/replay logic, Host provider and HMC/Immersive protocols. Runtime caller checks are unchanged. Existing Settings configuration is read; preview-Manager preferences are never imported. A separate bounded request queue has an8-second reply deadline; original runtime drains do not hold foreground broadcasts open. Appearance acknowledgement is guarded against losing a newer concurrent edit.
+
+Connection to Settings and an HMC probe response are reported separately. Saved/pending does not claim every feature is active. No polling loop, boot receiver, service, root request or new native library is added. If Settings is unavailable, open the UI again from its Settings entry. Physical launch, resource loading, live configuration and reboot acceptance are still pending; this is not a ROM release.
 
 ## Build
 
@@ -46,6 +50,19 @@ Output: `app/build/outputs/apk/release/app-release.apk`. This is a debug-signed 
 
 `catalog.json` was exported from Mixi Framework1.0.4 EnhancedCatalog (92controls) using the original Java initializer, preserving keys/defaults/options. Run the generator after modifying the source catalog; the verifier checks generated metadata stays in sync. The repository verifier checks the shipped data and UI-only app-manifest boundary. `VERIFICATION.json` records build, lint, signature and payload checks. Visual approval on a physical phone is still pending; build/lint do not establish pixel-perfect HyperOS parity.
 
+## Host test assembly
+
+Requires this checkout at `MixiFrameWork/manager/MixiFramework-Manager`, the existing Framework1.0.4 workspace fixtures and its local signing key. `host-integration/framework-inputs.json` pins external source inputs and the packager checks the accepted Host hash. No key or APK is stored in Git.
+
+```
+gradlew.bat -PhostUi=true :app:assembleRelease :app:lintRelease
+python host-integration/build_host.py
+python host-integration/test_integration.py
+python host-integration/package_test.py
+```
+
+Install only the resulting `Mixi-v1.0.4-HostUI-0.9.0-Test.zip` through the module manager, then reboot manually. Do not install its Host APK separately. The ZIP keeps the accepted installer and external runtime files; see its Vietnamese guide. Rollback: the accepted `Mixi-v1.0.4-Native-Test.zip`, with no app-data deletion. Source rollback before integration is `8c4bfe5`; integration is `16bba7d`.
+
 ## Credits
 
-[Miuix](https://github.com/compose-miuix-ui/miuix) — YuKongA and contributors, Apache-2.0. HMC/Enhanced — zyl6932/Lewewe, AGPL-3.0. HyperModifier — AritxOnly. See LICENSE/NOTICE and bundled attribution files. No original feature APKs are bundled.
+[Miuix](https://github.com/compose-miuix-ui/miuix) — YuKongA and contributors, Apache-2.0. HMC/Enhanced — zyl6932/Lewewe, AGPL-3.0. HyperModifier — AritxOnly. See LICENSE/NOTICE and bundled attribution files. Original feature APKs are not committed in this UI repository; the test assembly retains the accepted Host payload unchanged.
