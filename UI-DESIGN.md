@@ -49,3 +49,5 @@ Same UI is embedded inside MixiHost, launched from the owned Settings header int
 
 ## 0.9.1 connected card and OEM preview path
 Connected relay uses green card/check; it does not certify every hook. Routine saved/pending/runtime copy removed. Soft Glass preview requests bounded wallpaper JPEG and original APK d52.r recipe through authenticated Settings relay on page entry, decodes off main, uses OEM setMiGlass/blur APIs on a local View and clears Glass on release. No simulated material fallback. Live wallpaper frames, OEM hidden API permission and actual recipe loading/render parity are not verified. HMC/native payload preserved.
+
+Cache-start optimization: validate trusted cached module first; read/hash embedded module only when cache missing/corrupt. No removed integrity check. No force-stop or process killer: background cached process is allowed with no active work. Baseline launch292ms cold/81ms warm/28ms hot; 30-second CPU sample in BENCHMARK.json. Post-install startup speed is pending; desktop checksum fixture is not Android launch proof.

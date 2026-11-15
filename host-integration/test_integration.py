@@ -66,3 +66,6 @@ preview=(manager/'app/src/main/kotlin/com/mixi/manager/SoftGlassPreview.kt').rea
 assert 'textureBlur(' not in preview and 'setMiGlass' in preview
 assert 'loadPreview()' in preview and 'previewAssets' in bridge
 print('HOST_UI_LOCAL_CHECKS_PASS')
+
+assert factory.index("if (!target.isFile()") < factory.index('getEntry("assets/mixi-ui/module.apk")')
+print("CACHE_HIT_SKIPS_EMBEDDED_MODULE_READ_SOURCE_PASS")

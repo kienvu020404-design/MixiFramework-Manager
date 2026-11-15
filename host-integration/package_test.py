@@ -22,7 +22,7 @@ parts['HUONG-DAN.txt']=('MixiHost UI test - UI 0.9.1 / runtime 1.0.4\n'
  'Chưa có kiểm thử cài/boot/hiển thị trên điện thoại cho bản tích hợp này. Không dùng làm gói ROM chính thức.\n'
  'Rollback: cài lại Mixi-v1.0.4-Native-Test.zip đã nghiệm thu hoặc tắt module test; reboot thủ công. Không xóa dữ liệu ứng dụng.\n').encode()
 parts['SHA256SUMS']=''.join(sha(b)+'  '+n+'\n' for n,b in parts.items() if n.startswith('system/')).encode()
-artifact=root/'out/Mixi-v1.0.4-HostUI-0.9.1-Test.zip'
+artifact=root/'out/Mixi-v1.0.4-HostUI-0.9.1-CacheTest.zip'
 with zipfile.ZipFile(artifact,'w',zipfile.ZIP_DEFLATED) as z:
  for n,b in parts.items():z.writestr(n,b)
 with zipfile.ZipFile(artifact) as z:

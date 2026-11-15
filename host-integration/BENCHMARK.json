@@ -1,0 +1,15 @@
+{
+  "installedBaselineLaunchMs": {
+    "cold": 292,
+    "warm": 81,
+    "hot": [
+      28,
+      28
+    ]
+  },
+  "backgroundSeconds": 30.03,
+  "backgroundCpuTicks": 2,
+  "cpuPercentOneCore": 0.0666000666000666,
+  "scope": "installed pre-optimization build; no after-install launch measurement",
+  "wakelock": "Observed system *launch* acquired/released; no Mixi-held lock identified in snapshot; not overnight battery proof"
+}

@@ -28,14 +28,16 @@ public final class HostUiFactory extends AppComponentFactory {
         byte[] bytes;
         String expected;
         try (ZipFile apk = new ZipFile(info.sourceDir)) {
-            bytes = apk.getInputStream(apk.getEntry("assets/mixi-ui/module.apk")).readAllBytes();
             expected = new String(apk.getInputStream(apk.getEntry("assets/mixi-ui/sha256")).readAllBytes(), java.nio.charset.StandardCharsets.US_ASCII).trim();
         }
-        if (!digest(bytes).equals(expected)) throw new SecurityException("UI module checksum");
         File folder = new File(info.dataDir, "code_cache/mixi-ui");
         if (!folder.isDirectory() && !folder.mkdirs()) throw new IOException("UI cache directory");
         File target = new File(folder, "module.apk");
         if (!target.isFile() || !digest(java.nio.file.Files.readAllBytes(target.toPath())).equals(expected)) {
+            try (ZipFile apk = new ZipFile(info.sourceDir)) {
+                bytes = apk.getInputStream(apk.getEntry("assets/mixi-ui/module.apk")).readAllBytes();
+            }
+            if (!digest(bytes).equals(expected)) throw new SecurityException("UI module checksum");
             File temporary = new File(folder, "module.tmp");
             java.nio.file.Files.deleteIfExists(temporary.toPath());
             try (FileOutputStream output = new FileOutputStream(temporary)) {

@@ -1,16 +1,13 @@
 {
-  "hostSha256": "f3f0f1e8a2e38712a07c46a6d5c6ffb704b1287b23e3da03616443dc2b5bf5f4",
+  "hostSha256": "61fb1aefe2f3dd8e02699e1c569cb94f51a5355865c6fa4b9ff53de158832ce4",
   "uiSha256": "f9fecfc9907ea1b28f07a2211f7032953a77a2d2a195c85930d8368c0bfd7fdd",
   "baselineSha256": "fc2f2f5701dfa41e95a95ab182d13aece279331e5f52d6082982b5055187e8bc",
   "checks": "signature identity, CRC, UI resource package 0x80, original API/HMC DEX/resources/assets/libs exact, non-SettingsExtension core classes preserved",
-  "device": "PENDING: wallpaper access, original recipe helper loading and OEM rendering in Host window require phone acceptance; no native preview parity claim",
+  "device": "PENDING: no install/boot/Activity/relay/render acceptance",
   "scope": "Settings navigation/config relay + lazy isolated Host UI; no runtime native/HMC changes",
   "localTests": "92 catalog defaults/invalid values; source-extracted acknowledgement race; auth/deadline/extraction source contracts; nested APK CRC PASS",
-  "artifact": "Mixi-v1.0.4-HostUI-0.9.1-Test.zip",
-  "moduleSha256": "edcc74bd041bcbe6b460af9125c679d8885b23a08d089de5bbee40f662c385b0",
+  "artifact": "Mixi-v1.0.4-HostUI-0.9.1-CacheTest.zip",
+  "moduleSha256": "6eef058c61ac9023cc7c97762be33a8544b078d6109a5072c3ff14ff21b1f0f7",
   "moduleChecks": "CRC/SHA256SUMS/unchanged installer/unchanged external native+API JAR PASS",
-  "noAutomaticInstall": true,
-  "version": "0.9.1-host-ui",
-  "change": "Green connected-state check; remove routine saved/runtime text; wallpaper JPEG from authenticated Settings relay; original HyperModifier recipe + OEM View.setMiGlass preview, no Miuix material fallback",
-  "lintWarnings": 5
+  "noAutomaticInstall": true
 }
