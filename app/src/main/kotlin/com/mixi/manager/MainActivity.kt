@@ -189,6 +189,7 @@ private data class Screen(val route:String):NavKey
                         BasicComponent(title="HyperModifier",summary="AritxOnly")
                         BasicComponent(title="Kotlin & Jetpack Compose",summary="Apache-2.0")
                     }
+                    "appearance"->SoftGlassPage(store)
                     else->{
                         PreviewNote()
                         val controls=store.byPage[route].orEmpty()
@@ -231,20 +232,20 @@ private data class Screen(val route:String):NavKey
 }
 
 @Composable private fun PreviewNote(){Card{BasicComponent(title="Chưa kết nối framework",summary="Các lựa chọn hiện chỉ lưu trong Manager, chưa áp dụng lên hệ thống.")}}
-@Composable private fun Group(title:String,content:@Composable ColumnScope.()->Unit){
+@Composable internal fun Group(title:String,content:@Composable ColumnScope.()->Unit){
     Column(verticalArrangement=Arrangement.spacedBy(8.dp)){
         Text(title,modifier=Modifier.padding(start=12.dp,top=4.dp),fontSize=14.sp,color=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f))
         Card(content=content)
     }
 }
-@Composable private fun OptionRow(option:Option,store:UiStore){
+@Composable internal fun OptionRow(option:Option,store:UiStore,onPreviewChange:((String,String)->Unit)?=null){
     val current=store.value(option)
     when(option.kind){
         "bool"->SwitchPreference(title=option.title,checked=current=="true",onCheckedChange={store.set(option.key,it.toString())})
         "choice"->OverlayDropdownPreference(items=option.labels,selectedIndex=option.values.indexOf(current).coerceAtLeast(0),title=option.title,onSelectedIndexChange={store.set(option.key,option.values[it])})
         "range","time"->{
             var draft by remember(option.key,current){mutableFloatStateOf(current.toFloat())}
-            SliderPreference(title=option.title,value=draft,valueRange=option.min.toFloat()..option.max.toFloat(),valueText="${draft.toInt()}${option.unit}",onValueChange={draft=it},onValueChangeFinished={
+            SliderPreference(title=option.title,value=draft,valueRange=option.min.toFloat()..option.max.toFloat(),valueText="${draft.toInt()}${option.unit}",onValueChange={draft=it;onPreviewChange?.invoke(option.key,it.toInt().toString())},onValueChangeFinished={
                 val value=draft.toInt();store.set(option.key,(if(option.kind=="time"&&value in 1..9)10 else value).toString())
             })
         }

@@ -16,3 +16,6 @@ Use original Miuix Folme spring for floating-tab pager: damping .95, response .4
 
 ## 0.5 unbranded launch
 User wants entry from HyperOS Settings to feel like opening a settings page, not a standalone branded app launch. Both day/night themes set windowDisablePreview=true, empty vector splash icon and zero icon animation duration; preserve normal opaque Activity and edge-to-edge behavior. Launcher icon unchanged; no separate splash Activity, delay, keep condition or extra startup service. This controls branding/preview, not cold-start latency or every OEM launch transition; actual Settings integration remains a separate pending task.
+
+## 0.6 Soft Glass sample UI
+User explicitly requests layout/preview UI first, exact system appearance later. Add a local static landscape Canvas and rounded sample panel using the existing Miuix blur effect; four local parameters influence blur/tint/highlight illustration. Draft slider values affect only this page during dragging, persisted local values update on release. Clearly label approximate UI/not HyperOS renderer, no framework writes or continuous animation. No image generation/download needed. Phone visual acceptance pending.

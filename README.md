@@ -1,6 +1,6 @@
 # Mixi Framework Manager
 
-Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA**, pinned to 0.9.4. Android15+ / targetAndroid17. Package `com.mixi.manager`, UI milestone `0.5.0-ui`.
+Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA**, pinned to 0.9.4. Android15+ / targetAndroid17. Package `com.mixi.manager`, UI milestone `0.6.0-ui`.
 
 ## Implemented
 
@@ -14,6 +14,12 @@ Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA*
 - Searchable92-field catalog across10groups: HMC Enhanced subpages, Soft Glass and extensions.
 - Original Miuix switches, overlay dropdowns and sliders with live numbers; slider previews persist on release.
 - System/light/dark themes and preserved page scroll; Mixi logo, about and source credits.
+
+## Soft Glass preview
+
+The Soft Glass page includes a static locally drawn scene and a Miuix sample panel. Blur/background sliders sit above the sample, opacity/reflection below. Slider drafts update the illustration during dragging, while local preferences save on release. The master switch returns the sample to a neutral panel when off. There is no continuous wallpaper animation or extra network/image dependency.
+
+This preview is deliberately a **UI illustration**, not the HyperOS material renderer. Parameters are mapped for visual feedback only and do not promise pixel parity with notifications/Control Center. Exact material rendering and authenticated system configuration remain deferred. Nothing is applied to the framework by this preview.
 
 ## Boundary
 
