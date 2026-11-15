@@ -10,9 +10,9 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowCompat
-import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import top.yukonga.miuix.kmp.blur.*
+import top.yukonga.miuix.kmp.nav.core.*
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -41,9 +42,11 @@ import top.yukonga.miuix.kmp.icon.extended.Home
 import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.icon.extended.Info
 
+@Immutable
 data class Option(val page:String,val key:String,val title:String,val kind:String,val initial:String,
                   val min:Int,val max:Int,val unit:String,val labels:List<String>,val values:List<String>,val secret:Boolean)
 
+@Stable
 class UiStore(context:Context) {
     private val preferences=context.getSharedPreferences("manager_ui_preview",Context.MODE_PRIVATE)
     val values=mutableStateMapOf<String,String>().apply {
@@ -84,16 +87,24 @@ class MainActivity:ComponentActivity(){
     }
 }
 
+private data class Screen(val route:String):NavKey
+
 @Composable private fun Manager(store:UiStore,context:Context){
-    val pageStates=rememberSaveableStateHolder()
     var tab by rememberSaveable{mutableIntStateOf(0)}
-    var detail by rememberSaveable{mutableStateOf("")}
-    fun back(){detail=if(detail in pages && detail !in listOf("appearance","extensions"))"hmc" else ""}
-    BackHandler(detail.isNotEmpty()||tab!=0){if(detail.isNotEmpty())back() else tab=0}
+    val rootPager=rememberPagerState(initialPage=tab,pageCount={3})
+    LaunchedEffect(tab){rootPager.animateScrollToPage(tab,animationSpec=tween(240))}
+    val stack=remember{navBackStackOf(Screen("root"))}
+    fun open(route:String){if((stack.lastOrNull() as? Screen)?.route!=route)stack.add(Screen(route))}
+    fun back(){if(stack.size>1)stack.removeAt(stack.lastIndex)}
+    BackHandler(stack.size==1&&tab!=0){tab=0}
+    NavDisplay(backStack=stack,onBack={back()}){
+        entry<Screen>{screen->
+    val pageStates=rememberSaveableStateHolder()
+    val detail=screen.route.takeUnless{it=="root"}.orEmpty()
     val title=if(detail.isEmpty())listOf("Mixi Framework","Tính năng","Thông tin")[tab] else if(detail=="hmc")"HyperMusicCover Enhanced" else pages[detail]?:"Mã nguồn & Ghi nhận"
     val surface=MiuixTheme.colorScheme.surface
     val backdrop=rememberLayerBackdrop{drawRect(surface);drawContent()}
-    val scrollBehavior=key(detail,tab){MiuixScrollBehavior()}
+    val scrollBehavior=key(screen,tab){MiuixScrollBehavior()}
     val barColors=BlurDefaults.blurColors(blendColors=listOf(BlendColorEntry(color=surface.copy(alpha=.38f))))
     Scaffold(topBar={
         Box {
@@ -116,16 +127,7 @@ class MainActivity:ComponentActivity(){
     }}){padding->
         Box(Modifier.fillMaxSize().layerBackdrop(backdrop)){
         val pageKey=detail.ifEmpty{"tab$tab"}
-        AnimatedContent(targetState=pageKey,modifier=Modifier.fillMaxSize(),label="page",transitionSpec={
-            val forward=targetState !in listOf("tab0","tab1","tab2","hmc") || initialState.startsWith("tab") && !targetState.startsWith("tab")
-            val direction=if(forward)1 else -1
-            if(initialState.startsWith("tab")&&targetState.startsWith("tab")){
-                (fadeIn(tween(150)) togetherWith fadeOut(tween(100))).using(null)
-            }else{
-                ((slideInHorizontally(tween(280,easing=FastOutSlowInEasing)){it*direction/5}+fadeIn(tween(180))) togetherWith
-                    (slideOutHorizontally(tween(280,easing=FastOutSlowInEasing)){-it*direction/10}+fadeOut(tween(120)))).using(null)
-            }
-        }){route->
+        val pageContent: @Composable (String)->Unit = {route->
             pageStates.SaveableStateProvider(route){Column(Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection)
                 .verticalScroll(rememberScrollState()).padding(top=padding.calculateTopPadding(),bottom=padding.calculateBottomPadding())
                 .padding(horizontal=16.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){
@@ -133,9 +135,9 @@ class MainActivity:ComponentActivity(){
                     "tab0"->{
                         FrameworkStatusCard()
                         Group("Tính năng"){
-                            ArrowPreference(title="HyperMusicCover Enhanced",summary="Ảnh bìa, lời bài hát và Lockscreen Island",onClick={detail="hmc"})
-                            ArrowPreference(title="Tùy chỉnh Soft Glass",summary="Độ mờ, độ trong và phản chiếu",onClick={detail="appearance"})
-                            ArrowPreference(title="Tiện ích mở rộng",summary="Thanh cử chỉ, màn hình khóa và thanh trạng thái",onClick={detail="extensions"})
+                            ArrowPreference(title="HyperMusicCover Enhanced",summary="Ảnh bìa, lời bài hát và Lockscreen Island",onClick={open("hmc")})
+                            ArrowPreference(title="Tùy chỉnh Soft Glass",summary="Độ mờ, độ trong và phản chiếu",onClick={open("appearance")})
+                            ArrowPreference(title="Tiện ích mở rộng",summary="Thanh cử chỉ, màn hình khóa và thanh trạng thái",onClick={open("extensions")})
                         }
                         Group("Thông tin ROM"){
                             BasicComponent(title="Phiên bản ROM",summary=Build.VERSION.INCREMENTAL)
@@ -148,16 +150,16 @@ class MainActivity:ComponentActivity(){
                         var query by rememberSaveable{mutableStateOf("")}
                         TextField(value=query,onValueChange={query=it},label="Tìm tùy chỉnh",singleLine=true,modifier=Modifier.fillMaxWidth())
                         if(query.isBlank()){
-                            Group("Âm nhạc & Màn hình khóa"){ArrowPreference(title="HyperMusicCover Enhanced",summary="8 nhóm tùy chỉnh",onClick={detail="hmc"})}
+                            Group("Âm nhạc & Màn hình khóa"){ArrowPreference(title="HyperMusicCover Enhanced",summary="8 nhóm tùy chỉnh",onClick={open("hmc")})}
                             Group("Giao diện hệ thống"){
-                                ArrowPreference(title="Tùy chỉnh Soft Glass",onClick={detail="appearance"})
-                                ArrowPreference(title="Tiện ích mở rộng",onClick={detail="extensions"})
+                                ArrowPreference(title="Tùy chỉnh Soft Glass",onClick={open("appearance")})
+                                ArrowPreference(title="Tiện ích mở rộng",onClick={open("extensions")})
                             }
                         }else{
                             val found=store.catalog.filter{it.title.contains(query,true)}
                             Group("${found.size} kết quả"){
                                 if(found.isEmpty())BasicComponent(title="Không tìm thấy tùy chỉnh",summary="Thử một từ khóa khác.")
-                                found.forEach{option->ArrowPreference(title=option.title,summary=pages[option.page],onClick={detail=option.page})}
+                                found.forEach{option->ArrowPreference(title=option.title,summary=pages[option.page],onClick={open(option.page)})}
                             }
                         }
                         PreviewNote()
@@ -173,7 +175,7 @@ class MainActivity:ComponentActivity(){
                         }
                         Group("Dự án"){
                             ArrowPreference(title="Mã nguồn Manager",summary="GitHub · Kien Vu",onClick={context.startActivity(Intent(Intent.ACTION_VIEW,Uri.parse("https://github.com/kienvu020404-design/MixiFramework-Manager")))})
-                            ArrowPreference(title="Mã nguồn mở & Ghi nhận",onClick={detail="credits"})
+                            ArrowPreference(title="Mã nguồn mở & Ghi nhận",onClick={open("credits")})
                         }
                     }
                     "hmc"->{
@@ -181,7 +183,7 @@ class MainActivity:ComponentActivity(){
                         Card {SwitchPreference(title="HyperMusicCover Enhanced",summary="Lựa chọn xem trước trên Manager",checked=store.values["preview.hmc"]!="false",onCheckedChange={store.set("preview.hmc",it.toString())})}
                         Group("Cá nhân hóa"){
                             pages.filterKeys{it !in listOf("appearance","extensions")}.forEach{(page,name)->
-                                ArrowPreference(title=name,summary="${store.catalog.count{it.page==page}} tùy chỉnh",onClick={detail=page})
+                                ArrowPreference(title=name,summary="${store.catalog.count{it.page==page}} tùy chỉnh",onClick={open(page)})
                             }
                         }
                     }
@@ -210,7 +212,12 @@ class MainActivity:ComponentActivity(){
                 Spacer(Modifier.height(24.dp))
             }}
         }
+        if(detail.isEmpty()){
+            HorizontalPager(state=rootPager,userScrollEnabled=false,beyondViewportPageCount=1,modifier=Modifier.fillMaxSize()){index->pageContent("tab$index")}
+        }else pageContent(pageKey)
         }
+    }
+    }
     }
 }
 
