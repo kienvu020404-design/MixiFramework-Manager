@@ -9,3 +9,6 @@ Source-extracted callback tests: owned bitmap/visibility and one write, foreign 
 Device baseline via benchmark_settings.py --label before-settingsopt --runs5: actual COLD [216,226,223,231,224], median224ms; actual HOT [35,38,44,34,34,47,32,31,33,33], median34ms. No actual WARM sample. Only background/cached Settings is killed for controlled cold starts; no force-stop, install, app-data or ART changes. Do not infer gains before the same after procedure. Thermal/frequency not controlled.
 
 Candidate Mixi-v1.0.4-SettingsOpt-Test.zip copied to PC/phone Download, hash ae3f2877a92f332142e483e9b94bf605545f3b1e192442f9daba4dfb9aec1ccb verified. User manual install/reboot pending per AGENTS. Versions/UI work remains deferred until this stage is measured. Rollback: previous0.9.4 module; no data deletion.
+
+## Result / decision
+Installed candidate hash21fae52ab979bce206cd89ae8799203d90c1f45d69c8c5e923d8a90d3a8ca3aa verified. After first: COLDmedian252ms/HOT41.5ms. Repeat: COLD235/HOT37ms; baseline224/34ms. Uncontrolled conditions prevent causal attribution, but there is no improvement supporting this alternate native hook. Candidate rejected and the original icon after-hook restored in source. Keep benchmark tool/results, remove prototype-only test. Do not label the next release as Settings speed improvement. Resume requested UI/version changes only after this result.

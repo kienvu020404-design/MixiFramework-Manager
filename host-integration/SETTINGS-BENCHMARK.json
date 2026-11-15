@@ -1,0 +1,97 @@
+{
+  "before": {
+    "COLD": {
+      "samples": [
+        216,
+        226,
+        223,
+        231,
+        224
+      ],
+      "medianMs": 224
+    },
+    "WARM": {
+      "samples": [],
+      "medianMs": null
+    },
+    "HOT": {
+      "samples": [
+        35,
+        38,
+        44,
+        34,
+        34,
+        47,
+        32,
+        31,
+        33,
+        33
+      ],
+      "medianMs": 34.0
+    }
+  },
+  "candidateAfterFirst": {
+    "COLD": {
+      "samples": [
+        271,
+        286,
+        226,
+        252,
+        235
+      ],
+      "medianMs": 252
+    },
+    "WARM": {
+      "samples": [],
+      "medianMs": null
+    },
+    "HOT": {
+      "samples": [
+        42,
+        41,
+        36,
+        42,
+        38,
+        44,
+        55,
+        36,
+        33,
+        43
+      ],
+      "medianMs": 41.5
+    }
+  },
+  "candidateAfterRepeat": {
+    "COLD": {
+      "samples": [
+        222,
+        243,
+        235,
+        232,
+        235
+      ],
+      "medianMs": 235
+    },
+    "WARM": {
+      "samples": [],
+      "medianMs": null
+    },
+    "HOT": {
+      "samples": [
+        40,
+        38,
+        47,
+        36,
+        43,
+        37,
+        37,
+        32,
+        33,
+        34
+      ],
+      "medianMs": 37.0
+    }
+  },
+  "decision": "Rejected candidate: no measured opening improvement. Restore accepted icon after-hook. Retain benchmark tooling; no OEM APK/ART changes.",
+  "limits": "No thermal/frequency control, no causal slowdown claim; samples do not justify keeping alternate hook path."
+}
