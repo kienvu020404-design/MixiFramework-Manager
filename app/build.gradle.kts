@@ -1,0 +1,17 @@
+plugins { id("com.android.application"); id("org.jetbrains.kotlin.plugin.compose") }
+android {
+ namespace = "com.mixi.manager"
+ compileSdk { version = release(37) }
+ buildToolsVersion = "37.0.0"
+ defaultConfig { applicationId = "com.mixi.manager"; minSdk = 35; targetSdk = 37; versionCode = 1; versionName = "0.1.0-ui" }
+ buildFeatures { compose = true; buildConfig = true }
+ compileOptions { sourceCompatibility = JavaVersion.VERSION_21; targetCompatibility = JavaVersion.VERSION_21 }
+}
+kotlin { jvmToolchain(21); compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21) } }
+dependencies {
+ implementation("androidx.activity:activity-compose:1.13.0")
+ implementation("top.yukonga.miuix.kmp:miuix-ui-android:0.9.4")
+ implementation("top.yukonga.miuix.kmp:miuix-preference-android:0.9.4")
+ implementation("top.yukonga.miuix.kmp:miuix-icons-android:0.9.4")
+ implementation("top.yukonga.miuix.kmp:miuix-nav-android:0.9.4")
+}
