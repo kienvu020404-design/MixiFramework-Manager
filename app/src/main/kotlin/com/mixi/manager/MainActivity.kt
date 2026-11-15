@@ -30,6 +30,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -88,7 +90,12 @@ private data class Screen(val route:String):NavKey
 @Composable private fun Manager(store:UiStore,context:Context){
     var tab by rememberSaveable{mutableIntStateOf(0)}
     val rootPager=rememberPagerState(initialPage=tab,pageCount={3})
-    LaunchedEffect(tab){rootPager.animateScrollToPage(tab,animationSpec=folmeSpring(damping=.95f,response=.4f,visibilityThreshold=.5f))}
+    val focus=LocalFocusManager.current
+    val keyboard=LocalSoftwareKeyboardController.current
+    LaunchedEffect(tab){
+        focus.clearFocus(force=true);keyboard?.hide()
+        rootPager.animateScrollToPage(tab,animationSpec=folmeSpring(damping=.95f,response=.4f,visibilityThreshold=.5f))
+    }
     val stack=remember{navBackStackOf(Screen("root"))}
     fun open(route:String){if((stack.lastOrNull() as? Screen)?.route!=route)stack.add(Screen(route))}
     fun back(){if(stack.size>1)stack.removeAt(stack.lastIndex)}
@@ -100,7 +107,9 @@ private data class Screen(val route:String):NavKey
     val title=if(detail.isEmpty())listOf("Mixi Framework","Tính năng","Thông tin")[tab] else if(detail=="hmc")"HyperMusicCover Enhanced" else pages[detail]?:"Mã nguồn & Ghi nhận"
     val surface=MiuixTheme.colorScheme.surface
     val backdrop=rememberLayerBackdrop{drawRect(surface);drawContent()}
-    val scrollBehavior=key(screen,tab){MiuixScrollBehavior()}
+    val tabScrolls=(0..2).map{index->key(screen,index){MiuixScrollBehavior(canScroll={detail.isEmpty()&&tab==index&&!rootPager.isScrollInProgress})}}
+    val detailScroll=key(screen){MiuixScrollBehavior()}
+    val scrollBehavior=if(detail.isEmpty())tabScrolls[tab] else detailScroll
     val barColors=BlurDefaults.blurColors(blendColors=listOf(BlendColorEntry(color=surface.copy(alpha=.38f))))
     Scaffold(popupHost={
         MiuixTheme(colors=MiuixTheme.colorScheme.copy(surfaceContainer=Color.Transparent)){MiuixPopupHost()}
@@ -126,7 +135,8 @@ private data class Screen(val route:String):NavKey
         Box(Modifier.fillMaxSize().layerBackdrop(backdrop)){
         val pageKey=detail.ifEmpty{"tab$tab"}
         val pageContent: @Composable (String)->Unit = {route->
-            pageStates.SaveableStateProvider(route){Column(Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection)
+            val pageScroll=when(route){"tab0"->tabScrolls[0];"tab1"->tabScrolls[1];"tab2"->tabScrolls[2];else->detailScroll}
+            pageStates.SaveableStateProvider(route){Column(Modifier.fillMaxSize().nestedScroll(pageScroll.nestedScrollConnection)
                 .verticalScroll(rememberScrollState()).padding(top=padding.calculateTopPadding(),bottom=padding.calculateBottomPadding())
                 .padding(horizontal=16.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){
                 CompositionLocalProvider(LocalMenuBackdrop provides backdrop){

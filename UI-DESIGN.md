@@ -40,3 +40,6 @@ Factor one shared GlassChoicePopup from the existing dropdown helper. The HyperI
 
 ## 0.8.2 compact popup width
 User requests less empty horizontal menu space. Measure the shared surface using IntrinsicSize.Max inside a200–240dp default width range instead of expanding the list to288dp. Pass the same minimum to the original OverlayListPopup measurement; unit menus retain180dp minimum. Text wraps if needed, rowheight/accessible radio/tick behavior and8dpedgeinsets remain. Keep blur and no dim. Physical narrow/longlabel approval pending.
+
+## 0.8.3 search to Home title state
+Keep a separate remembered Miuix scroll behavior for each root tab and connect each retained pager page to its own behavior. Previously all pages connected to the selected tab behavior, allowing outgoing search content to affect Home. Only the active tab accepts scroll while the pager is settled. Clear focus and hide IME when changing tabs, including Back to Home. Detail navigation, popup and framework runtime are unchanged. Build/lint checks cannot establish visual reproduction; phone search/keyboard/tab/back regression remains pending.

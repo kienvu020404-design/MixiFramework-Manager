@@ -1,9 +1,9 @@
 {
-  "version": "0.8.2-ui",
+  "version": "0.8.3-ui",
   "package": "com.mixi.manager",
-  "sha256": "70b6ec9c98d9a48e474c785e315b3d4e4a8df767a5c1f6a45afe0b49714fce13",
-  "checks": "assembleRelease/lintRelease/signature/manifest/CRC/catalog/compiledmetadata/originalIslandassets/popupgeometrycontract PASS",
-  "change": "shared popup intrinsicwidthnotmaximumfill;defaultmin200,max240dp;unitsmin180;OverlayListPopupminWidthsamevalue;keepheight/insets/blur/no dim",
-  "scope": "UIonly,framework/HMCunchanged",
-  "visual": "physicalcompactness/longlabels/textscaling pendinguserreview"
+  "sha256": "3966809cf7d489f639278990128e4ba819af710cd33db67abc23d79c11124e83",
+  "checks": "assembleRelease/lintRelease/signature/manifest/CRC/catalog/compiledmetadata/originalIslandassets/popupgeometry/per-tab source wiring PASS",
+  "change": "Separate root-tab appbar scroll ownership; clear search focus and hide IME on tab change",
+  "scope": "UI only; framework/HMC unchanged",
+  "visual": "Search with IME then Home via floating bar/Back, repeated tab switching, scrolled Home restoration pending physical test; video not decoded locally"
 }

@@ -49,3 +49,10 @@ print('ORIGINAL_ENHANCED_ISLAND_ASSETS_PASS')
 assert 'max=240.dp).width(IntrinsicSize.Max)' in popup
 assert 'minWidth=minimumWidth' in popup
 print('COMPACT_POPUP_CONTENT_WIDTH_PASS')
+
+main=(root/"app/src/main/kotlin/com/mixi/manager/MainActivity.kt").read_text(encoding="utf-8")
+assert "key(screen,index)" in main and "nestedScroll(pageScroll.nestedScrollConnection)" in main
+for index in range(3):
+ assert f'"tab{index}"->tabScrolls[{index}]' in main
+assert "focus.clearFocus(force=true);keyboard?.hide()" in main
+print("PER_TAB_SCROLL_WIRING_SOURCE_CHECK_PASS (not a device visual test)")
