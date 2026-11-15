@@ -27,7 +27,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import top.yukonga.miuix.kmp.basic.*
 import top.yukonga.miuix.kmp.preference.SwitchPreference
-import top.yukonga.miuix.kmp.overlay.OverlayListPopup
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.unit.IntRect
+import kotlin.math.roundToInt
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 internal fun standbySeconds(text:String,minutes:Boolean,maximum:Int):Int? {
@@ -69,6 +72,7 @@ internal fun standbySeconds(text:String,minutes:Boolean,maximum:Int):Int? {
     var text by remember(field.key){mutableStateOf((if(minutes)stored/60 else stored).toString())}
     var focused by remember{mutableStateOf(false)}
     var showUnits by remember{mutableStateOf(false)}
+    var unitBounds by remember{mutableStateOf<IntRect?>(null)}
     val focus=LocalFocusManager.current
     val colors=MiuixTheme.colorScheme
     val shape=RoundedCornerShape(10.dp)
@@ -88,14 +92,15 @@ internal fun standbySeconds(text:String,minutes:Boolean,maximum:Int):Int? {
                     .onFocusChanged{if(focused&&!it.isFocused)settle();focused=it.isFocused})
             Box{
                 Text(if(minutes)"Phút" else "Giây",fontSize=14.sp,modifier=Modifier.clip(shape).background(colors.secondaryContainer)
+                    .onGloballyPositioned{coordinates->val rect=coordinates.boundsInWindow();unitBounds=IntRect(rect.left.roundToInt(),rect.top.roundToInt(),rect.right.roundToInt(),rect.bottom.roundToInt())}
                     .clickable(enabled=enabled){settle();focus.clearFocus();showUnits=true}.padding(horizontal=12.dp,vertical=10.dp))
-                OverlayListPopup(show=showUnits,enableWindowDim=false,alignment=PopupPositionProvider.Align.End,onDismissRequest={showUnits=false}){
-                    Column(Modifier.background(colors.surfaceContainer,RoundedCornerShape(20.dp)).padding(8.dp)){
-                        listOf("Giây","Phút").forEachIndexed{index,label->
-                            DropdownImpl(item=DropdownItem(text=label,selected=(index==1)==minutes,onClick={}),optionSize=2,isSelected=(index==1)==minutes,index=index,
-                                onSelectedIndexChange={val nextMinutes=index==1;val next=standbySeconds(text,minutes,field.max)?:stored;minutes=nextMinutes;text=(if(minutes)(next+59)/60 else next).toString();standbySeconds(text,minutes,field.max)?.let{store.set(field.key,it.toString())};showUnits=false})
-                        }
-                    }
+                GlassChoicePopup(items=listOf("Giây","Phút"),selectedIndex=if(minutes)1 else 0,show=showUnits,
+                    onDismiss={showUnits=false},anchor=unitBounds,minimumWidth=180.dp){index->
+                    val nextMinutes=index==1
+                    val next=standbySeconds(text,minutes,field.max)?:stored
+                    minutes=nextMinutes;text=(if(minutes)(next+59)/60 else next).toString()
+                    standbySeconds(text,minutes,field.max)?.let{store.set(field.key,it.toString())}
+                    showUnits=false
                 }
             }
         }

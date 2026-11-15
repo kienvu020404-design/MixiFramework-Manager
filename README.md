@@ -1,6 +1,6 @@
 # Mixi Framework Manager
 
-Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA**, pinned to 0.9.4. Android15+ / targetAndroid17. Package `com.mixi.manager`, UI milestone `0.8.0-ui`.
+Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA**, pinned to 0.9.4. Android15+ / targetAndroid17. Package `com.mixi.manager`, UI milestone `0.8.1-ui`.
 
 ## Implemented
 
@@ -24,7 +24,7 @@ This preview is deliberately a **UI illustration**, not the HyperOS material ren
 
 ## HyperImmersive and Island UI
 
-HyperImmersive has its own page with version/status placeholders, StandBy and blurred-background switches, numeric idle/off fields, seconds/minutes menus and a zero-time warning. Times are stored in seconds in the existing local preview keys; invalid inputs are not committed. Preview StandBy remains explicitly unavailable until runtime integration.
+HyperImmersive has its own page with version/status placeholders, StandBy and blurred-background switches, numeric idle/off fields, seconds/minutes menus anchored to the actual unit button with the same undimmed blur as other choices and a zero-time warning. Times are stored in seconds in the existing local preview keys; invalid inputs are not committed. Preview StandBy remains explicitly unavailable until runtime integration.
 
 Lockscreen SuperIsland uses the original HMC-Enhanced IslandDemo WebP assets, unchanged: choosing ColorOS or HyperOS switches the correct animation. The upstream ImageDecoder/ImageView approach is retained, with decoding off the UI thread and lifecycle-aware start/stop. Assets and source attribution are recorded in NOTICE.md; this is UI demo reuse, not a feature-runtime port.
 

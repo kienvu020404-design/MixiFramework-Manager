@@ -34,3 +34,6 @@ The two-choice screenshot exposed the final row touching the container edge and 
 
 ## 0.8 extension UI and original Island demo
 HyperImmersive matches the provided layout: runtime header (unknown until connected), two switches, inline numeric seconds/minutes timeout controls and zero warning, unavailable preview action clearly identified. Reuse Enhanced StandbyTimeRow UX. Island page reuses original Enhanced IslandDemo + exactColorOS/HyperOS animatedWebP assets, not a customdrawn Island. Decode asynchronously and stop on lifecycle pause/dispose. No runningstatusfabrication or framework writes. Physicalfocus/unit/animation acceptance pending.
+
+## 0.8.1 unit menu anchor/material
+Factor one shared GlassChoicePopup from the existing dropdown helper. The HyperImmersive unit button records boundsInWindow; only this anchor is passed to Miuix default position provider, avoiding inference from the whole preference row. Reuse existing blur/tick/roundedgeometry/no-dim style and compact180dp minimum width. Standard choice anchors remain unchanged. Actual phone placement after IME/scroll needs visual approval.

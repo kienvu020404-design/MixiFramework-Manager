@@ -34,19 +34,39 @@ internal val LocalMenuBackdrop=staticCompositionLocalOf<LayerBackdrop?>{null}
 ){
     var expanded by remember{mutableStateOf(false)}
     val haptics=LocalHapticFeedback.current
+    val scheme=MiuixTheme.colorScheme
+    BasicComponent(title=title,onClick={if(items.isNotEmpty()){haptics.performHapticFeedback(HapticFeedbackType.ContextClick);expanded=true}},enabled=items.isNotEmpty(),endActions={
+        Text(items.getOrNull(selectedIndex).orEmpty(),fontSize=14.sp,textAlign=TextAlign.End,color=scheme.onSurfaceVariantActions,modifier=Modifier.weight(1f,false).padding(end=10.dp))
+        DropdownArrowEndAction(scheme.onSurfaceVariantActions)
+        GlassChoicePopup(items,selectedIndex,expanded,{expanded=false}){index->onSelectedIndexChange(index);expanded=false}
+
+    })
+}
+
+@Composable internal fun GlassChoicePopup(
+    items:List<String>,selectedIndex:Int,show:Boolean,onDismiss:()->Unit,
+    anchor:androidx.compose.ui.unit.IntRect?=null,minimumWidth:androidx.compose.ui.unit.Dp=220.dp,onSelect:(Int)->Unit,
+){
+    val haptics=LocalHapticFeedback.current
     val backdrop=LocalMenuBackdrop.current
     val scheme=MiuixTheme.colorScheme
     val shape=RoundedCornerShape(28.dp)
     val itemColors=DropdownDefaults.dropdownColors(containerColor=Color.Transparent,selectedContainerColor=Color.Transparent)
-    BasicComponent(title=title,onClick={if(items.isNotEmpty()){haptics.performHapticFeedback(HapticFeedbackType.ContextClick);expanded=true}},enabled=items.isNotEmpty(),endActions={
-        Text(items.getOrNull(selectedIndex).orEmpty(),fontSize=14.sp,textAlign=TextAlign.End,color=scheme.onSurfaceVariantActions,modifier=Modifier.weight(1f,false).padding(end=10.dp))
-        DropdownArrowEndAction(scheme.onSurfaceVariantActions)
-            OverlayListPopup(show=expanded,alignment=PopupPositionProvider.Align.End,enableWindowDim=false,
-                onDismissRequest={expanded=false}){
+    val position=remember(anchor){
+        val original=ListPopupDefaults.DropdownPositionProvider
+        object:PopupPositionProvider by original{
+            override fun calculatePosition(anchorBounds:androidx.compose.ui.unit.IntRect,windowBounds:androidx.compose.ui.unit.IntRect,
+                layoutDirection:androidx.compose.ui.unit.LayoutDirection,popupContentSize:androidx.compose.ui.unit.IntSize,
+                popupMargin:androidx.compose.ui.unit.IntRect,alignment:PopupPositionProvider.Align):androidx.compose.ui.unit.IntOffset =
+                original.calculatePosition(anchor?:anchorBounds,windowBounds,layoutDirection,popupContentSize,popupMargin,alignment)
+        }
+    }
+            OverlayListPopup(show=show,popupPositionProvider=position,alignment=PopupPositionProvider.Align.End,enableWindowDim=false,
+                onDismissRequest=onDismiss){
                 val material=if(backdrop!=null)Modifier.textureBlur(backdrop=backdrop,shape=shape,blurRadius=25f,noiseCoefficient=0f,
                     colors=BlurDefaults.blurColors(blendColors=listOf(BlendColorEntry(color=scheme.surfaceContainer.copy(alpha=.72f)))))
                     else Modifier.background(scheme.surfaceContainer,shape)
-                Box(Modifier.widthIn(min=220.dp,max=288.dp).clip(shape).then(material)
+                Box(Modifier.widthIn(min=minimumWidth,max=288.dp).clip(shape).then(material)
                     .border(.5.dp,Brush.linearGradient(listOf(scheme.onSurface.copy(alpha=.14f),Color.Transparent,scheme.onSurface.copy(alpha=.06f))),shape)){
                     Column(Modifier.fillMaxWidth().padding(8.dp).verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(2.dp)){
                         items.forEachIndexed{index,label->
@@ -54,11 +74,10 @@ internal val LocalMenuBackdrop=staticCompositionLocalOf<LayerBackdrop?>{null}
                             DropdownImpl(item=DropdownItem(text=label,selected=index==selectedIndex,onClick={}),
                                 optionSize=items.size,isSelected=index==selectedIndex,index=index,dropdownColors=itemColors,
                                 isFirst=false,isLast=false,
-                                onSelectedIndexChange={haptics.performHapticFeedback(HapticFeedbackType.Confirm);onSelectedIndexChange(index);expanded=false})
+                                onSelectedIndexChange={haptics.performHapticFeedback(HapticFeedbackType.Confirm);onSelect(index)})
                             }
                         }
                     }
                 }
             }
-    })
 }
