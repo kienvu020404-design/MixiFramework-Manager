@@ -1,0 +1,65 @@
+"""Local boundary/acknowledgement checks, not a device acceptance substitute."""
+from pathlib import Path
+import json, subprocess, zipfile
+
+manager=Path(__file__).resolve().parents[1];root=manager.parents[1]
+out=root/'out/manager-host';java=root/'tools/jdk/jdk-21.0.13+9/bin'
+android=root/'tools/sdk/platforms/android-37.0/android.jar'
+def run(*args):subprocess.run(list(map(str,args)),check=True)
+classes=out/'test-classes';classes.mkdir(exist_ok=True)
+run(java/'javac.exe','-cp',str(out/'settings-classes')+';'+str(android),'-d',classes,manager/'host-integration/BridgeValidationTest.java')
+run(java/'java.exe','-cp',';'.join(map(str,[classes,out/'settings-classes',android])),'mixi.settings.BridgeValidationTest')
+
+# Execute the exact generated acknowledgement block, with a newer edit arriving
+# while the old provider operation is blocked. No Android method is simulated.
+protocol=(out/'EnhancedProtocol.java').read_text(encoding='utf-8')
+start=protocol.index('                    synchronized (EnhancedProtocol.class)',protocol.index('notifyGlass(context);'))
+end=protocol.index('\n                    continue;',start)
+ack=protocol[start:end]
+fixture='''import java.util.*;import java.util.concurrent.*;
+public class EnhancedProtocol {
+ static final Map<String,String> pending=new HashMap<>();
+ static final Pref preferences=new Pref();
+ static class Pref { volatile String value="20"; volatile boolean marked=true;
+  String getString(String key,String fallback){return value;}
+  Pref edit(){return this;} Pref remove(String key){marked=false;return this;} void apply(){}
+ }
+ static void ack(String key,String value){__ACK_BLOCK__}
+ public static void main(String[] args)throws Exception{
+  String key="appearance.blur";pending.put(key,"20");
+  CountDownLatch applying=new CountDownLatch(1),release=new CountDownLatch(1);
+  Thread first=new Thread(()->{applying.countDown();try{release.await();}catch(Exception e){throw new RuntimeException(e);}ack(key,"20");});
+  first.start();applying.await();synchronized(EnhancedProtocol.class){preferences.value="35";pending.put(key,"35");}
+  release.countDown();first.join();
+  if(!"35".equals(pending.get(key))||!preferences.marked)throw new AssertionError("New edit lost");
+  ack(key,"35");if(!pending.isEmpty()||preferences.marked)throw new AssertionError("Current edit not acknowledged");
+  pending.put(key,"35");preferences.value="40";preferences.marked=true;ack(key,"35");
+  if(!preferences.marked)throw new AssertionError("New persisted edit lost its retry marker");
+  System.out.println("SOURCE_EXTRACTED_APPEARANCE_ACK_RACE_PASS");
+ }
+}'''.replace('__ACK_BLOCK__',ack)
+source=out/'ack-test/EnhancedProtocol.java';source.parent.mkdir(exist_ok=True);source.write_text(fixture,encoding='utf-8')
+run(java/'javac.exe','-d',source.parent,source)
+run(java/'java.exe','-cp',source.parent,'EnhancedProtocol')
+
+bridge=(manager/'host-integration/ManagerBridge.java').read_text(encoding='utf-8')
+assert 'getSentFromUid() != hostUid' in bridge and 'getSentFromPackage()' in bridge
+assert 'ArrayBlockingQueue<>(8)' in bridge and 'main.postDelayed(timeout,8000)' in bridge
+assert 'finished.compareAndSet(false,true)' in bridge and 'requests.execute(' in bridge
+assert 'EnhancedProtocol.worker.execute(' not in bridge
+factory=(manager/'host-integration/HostUiFactory.java').read_text(encoding='utf-8')
+assert factory.index('Files.deleteIfExists(temporary.toPath())')<factory.index('new FileOutputStream(temporary)')
+assert factory.index('temporary.setReadOnly()')<factory.index('output.write(bytes)')
+assert 'ClassLoader.getSystemClassLoader().getParent()' in factory
+print('AUTH_DEADLINE_EXTRACTION_SOURCE_CONTRACT_PASS (not Android runtime proof)')
+
+manifest=(out/'AndroidManifest.xml').read_text(encoding='utf-8')
+assert 'android:process=":manager"' in manifest and 'android:appComponentFactory="mixi.host.ui.HostUiFactory"' in manifest
+assert 'category.LAUNCHER' not in manifest and 'BOOT_COMPLETED' not in manifest
+with zipfile.ZipFile(out/'MixiHost-UI-Test.apk') as host:
+ assert host.testzip() is None
+ with zipfile.ZipFile(__import__('io').BytesIO(host.read('assets/mixi-ui/module.apk'))) as ui:assert ui.testzip() is None
+verification=json.loads((out/'verification.json').read_text())
+verification['localTests']='92 catalog defaults/invalid values; source-extracted acknowledgement race; auth/deadline/extraction source contracts; nested APK CRC PASS'
+(out/'verification.json').write_text(json.dumps(verification,indent=2)+'\n',encoding='utf-8')
+print('HOST_UI_LOCAL_CHECKS_PASS')

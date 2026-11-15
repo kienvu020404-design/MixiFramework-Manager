@@ -47,9 +47,9 @@ internal fun standbySeconds(text:String,minutes:Boolean,maximum:Int):Int? {
     Row(Modifier.fillMaxWidth().padding(horizontal=12.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceBetween){
         Column(verticalArrangement=Arrangement.spacedBy(6.dp)){
             Text("HyperImmersive · Alpha",fontSize=15.sp)
-            Text("Phiên bản runtime · Chưa xác nhận",fontSize=12.sp,color=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f))
+            Text("Phiên bản runtime · ${store.immersive.getString("version")?:"Chưa xác nhận"}",fontSize=12.sp,color=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f))
         }
-        Text("Chưa kết nối",fontSize=11.sp,color=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f))
+        Text(if(store.immersive.getBoolean("installed"))"Đã kết nối" else "Chưa kết nối",fontSize=11.sp,color=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f))
     }
     Card{
         SwitchPreference(title="StandBy",summary="Đặt điện thoại nằm ngang khi đang sạc để hiển thị StandBy.",checked=enabled,onCheckedChange={store.set("immersive.enabled",it.toString())})
@@ -61,15 +61,15 @@ internal fun standbySeconds(text:String,minutes:Boolean,maximum:Int):Int? {
                 else "StandBy đóng và tắt màn hình khi không có thao tác. Dựng điện thoại lên để dùng lại. 0 là không tắt.")
         }
         if(fields.filter{it.kind=="time"}.any{store.value(it)=="0"})Text("Đặt không giới hạn có thể làm máy nóng hơn và tăng nguy cơ lưu ảnh màn hình.",fontSize=12.sp,color=Color(0xFFD64545),modifier=Modifier.padding(horizontal=16.dp,vertical=10.dp))
-        BasicComponent(title="Xem trước StandBy",summary="Chưa khả dụng · Manager chưa kết nối runtime",onClick={Toast.makeText(context,"Chức năng này sẽ có khi kết nối HyperImmersive.",Toast.LENGTH_SHORT).show()})
+        BasicComponent(title="Xem trước StandBy",summary=if(store.connected)"Mở StandBy ngay" else "Chưa kết nối runtime",onClick={store.preview()})
     }
-    Text("Bản giao diện · Các lựa chọn hiện chỉ lưu trong Manager.",fontSize=12.sp,color=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f),modifier=Modifier.padding(horizontal=12.dp))
+    Text(store.message,fontSize=12.sp,color=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f),modifier=Modifier.padding(horizontal=12.dp))
 }
 
 @Composable private fun StandbyTimeRow(field:Option,store:UiStore,enabled:Boolean,title:String,summary:String){
     val stored=store.value(field).toIntOrNull()?:field.initial.toInt()
     var minutes by remember(field.key){mutableStateOf(stored%60==0)}
-    var text by remember(field.key){mutableStateOf((if(minutes)stored/60 else stored).toString())}
+    var text by remember(field.key,stored,minutes){mutableStateOf((if(minutes)stored/60 else stored).toString())}
     var focused by remember{mutableStateOf(false)}
     var showUnits by remember{mutableStateOf(false)}
     var unitBounds by remember{mutableStateOf<IntRect?>(null)}

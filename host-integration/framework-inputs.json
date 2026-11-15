@@ -1,0 +1,15 @@
+{
+  "rom-integration/v102/settings/mixi/settings/EnhancedProtocol.java": "1e1a4728637490870f9d7873df7eb8f306265d220e96f870641b797c0e27d68f",
+  "rom-integration/v102/settings/mixi/settings/HmcProtocol.java": "9b037d4e381ce473264b0bb50b86155ae1f8c807edded0d5b81b15c4b14a8ca2",
+  "rom-integration/v102/settings/mixi/settings/ImmersiveClient.java": "b8735be120f79d1cf2b218e785ace8d66e94127869edfe7b80bb5fedf5765f5d",
+  "rom-integration/v102/settings/mixi/settings/MixiValueSeekBarPreference.java": "375d5a433eaf3d569fee829eee95fb68253a4e838eba45d0215036d7b0702083",
+  "rom-integration/v103-apk/settings/mixi/settings/EnhancedCatalog.java": "fe8c822b891ffdecce1be41ab0a2bdfe31e6886b916155110a2c2cc7daad54d1",
+  "rom-integration/v103-apk/settings/mixi/settings/SettingsPage.java": "50c08cc707b197ce84b439721949dcb6525cd362a8c428b61ced28fca1d8720a",
+  "settings-extension/java/mixi/settings/MixiSettingsFragment.java": "9622bd6c07a73e9d7f8fa0871893e2d7da45bad001d07f267c9e8f7f41243d47",
+  "settings-extension/java/mixi/settings/MixiInfoPreference.java": "fd04e1504b72546ba3de726aa0eea632259dc4d41ec31f7a907f73cc5432b622",
+  "settings-extension/java/mixi/settings/Host.java": "385be87d606dc05c8eedca546a37ff4fe0827b93ce354a4c616c4248568b66c7",
+  "settings-extension/java/mixi/settings/RomInfo.java": "d49f1914bef32354ef9d4a2ec5b7c57b754a14c0855c16e9e61db86af20c31d7",
+  "rom-integration/v102/SettingsExtension.java": "f49c019144d0009b38e990e484336d76c17355ceaa08df113146ac50eebbf7b7",
+  "out/v104/AndroidManifest.xml": "aafa0696cba22dc32448725745b18495b58be2b3717e7605a74307e14cae81a5",
+  "scripts/v09/framework-child/ComposeDex.java": "141fb569b612132e0ee9cdacd3f42868470a2740c23476592e1b8bc2b23c2cbe"
+}

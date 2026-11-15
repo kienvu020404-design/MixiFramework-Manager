@@ -29,7 +29,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
     fun current(key:String):String= drafts[key]?:store.values[key]?:controls.first{it.key==key}.initial
     fun amount(key:String,max:Float)=current(key).toFloatOrNull()?.coerceIn(0f,max)?:0f
     val enabled=store.values["appearance.enabled"]=="true"
-    Card{BasicComponent(title="Xem trước Soft Glass",summary="Minh họa bố cục và hiệu ứng trong app. Vật liệu HyperOS chính xác và kết nối hệ thống sẽ được hoàn thiện sau.")}
+    Card{BasicComponent(title="Xem trước Soft Glass",summary="Minh họa trong app; chưa phải vật liệu HyperOS chính xác. ${store.message}")}
     Group("Soft Glass"){controls.filter{it.kind=="bool"}.forEach{OptionRow(it,store)}}
     GlassSample(enabled,amount("appearance.blur",100f),amount("appearance.background",200f),
         amount("appearance.opacity",100f),amount("appearance.reflection",200f))
@@ -43,7 +43,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
             OptionRow(it,store){key,value->drafts[key]=value}
         }
     }
-    Text("Kéo để xem minh họa ngay · Thả tay để lưu lựa chọn trên Manager",fontSize=13.sp,
+    Text(if(BuildConfig.HOST_INTEGRATED)"Kéo để xem minh họa · Thả tay để gửi cấu hình qua Settings" else "Kéo để xem minh họa · Thả tay để lưu bản xem trước",fontSize=13.sp,
         color=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f),modifier=Modifier.padding(horizontal=12.dp))
 }
 

@@ -1,9 +1,15 @@
 plugins { id("com.android.application"); id("org.jetbrains.kotlin.plugin.compose") }
+val hostUi = providers.gradleProperty("hostUi").orNull == "true"
 android {
  namespace = "com.mixi.manager"
  compileSdk { version = release(37) }
  buildToolsVersion = "37.0.0"
- defaultConfig { applicationId = "com.mixi.manager"; minSdk = 35; targetSdk = 37; versionCode = 14; versionName = "0.8.3-ui" }
+ defaultConfig {
+  applicationId = if(hostUi) "com.mixi.host" else "com.mixi.manager"
+  minSdk = 35; targetSdk = 37; versionCode = 15; versionName = "0.9.0-host-ui"
+  buildConfigField("boolean", "HOST_INTEGRATED", hostUi.toString())
+ }
+ if(hostUi) androidResources { additionalParameters += listOf("--package-id", "0x80") }
  buildFeatures { compose = true; buildConfig = true }
  buildTypes {
   getByName("release") {

@@ -10,6 +10,10 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import top.yukonga.miuix.kmp.anim.folmeSpring
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -20,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.focus.onFocusChanged
 import top.yukonga.miuix.kmp.blur.*
 import top.yukonga.miuix.kmp.nav.core.*
 import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.MiuixPopupHost
@@ -49,15 +54,56 @@ data class Option(val page:String,val key:String,val title:String,val kind:Strin
                   val min:Int,val max:Int,val unit:String,val labels:List<String>,val values:List<String>,val secret:Boolean)
 
 @Stable
-class UiStore(context:Context) {
+class UiStore(private val context:Context,private val scope:CoroutineScope) {
     private val preferences=context.getSharedPreferences("manager_ui_preview",Context.MODE_PRIVATE)
     val values=mutableStateMapOf<String,String>().apply {
-        preferences.all.forEach { (key,value)->if(value is String)put(key,value) }
+        preferences.all.forEach { (key,value)->if(value is String&&(!BuildConfig.HOST_INTEGRATED||key.startsWith("manager.")))put(key,value) }
     }
     val catalog:List<Option> = UiCatalog.options
     val byPage:Map<String,List<Option>> = catalog.groupBy{it.page}
     fun value(option:Option)=values[option.key]?:option.initial
-    fun set(key:String,value:String){values[key]=value;preferences.edit().putString(key,value).apply()}
+    var connected by mutableStateOf(false);private set
+    var hmcAlive by mutableStateOf(false);private set
+    var message by mutableStateOf(if(BuildConfig.HOST_INTEGRATED)"Đang kết nối Settings…" else "Bản xem trước · Chưa kết nối framework");private set
+    var immersive by mutableStateOf(android.os.Bundle());private set
+    private val mutex=Mutex()
+    private val pending=linkedMapOf<String,String>()
+    private val confirmed=mutableMapOf<String,String>()
+    private var writing:Job?=null
+    private fun accept(reply:android.os.Bundle){
+        val state=reply.getBundle("values")?:throw IllegalStateException("Thiếu cấu hình Host")
+        for(key in state.keySet())state.getString(key)?.let{confirmed[key]=it;if(!pending.containsKey(key))values[key]=it}
+        if(reply.containsKey("hmcAlive"))hmcAlive=reply.getBoolean("hmcAlive")
+        if(reply.containsKey("immersive"))immersive=reply.getBundle("immersive")?:android.os.Bundle()
+        connected=true
+        message=if(reply.getBoolean("pending"))"Đã lưu · Có cấu hình chờ runtime xác nhận" else "Đã kết nối cầu nối cấu hình của Settings"
+    }
+    fun refresh(){if(BuildConfig.HOST_INTEGRATED)scope.launch{
+        mutex.withLock{try{accept(hostRequest(context,"query"))}catch(failure:Exception){if(failure is CancellationException&&failure !is TimeoutCancellationException)throw failure;connected=false;message="Chưa kết nối Settings · Mở lại từ Cài đặt → Mixi Framework"}}
+    }}
+    fun preview(){if(connected)scope.launch{mutex.withLock{try{accept(hostRequest(context,"preview"))}catch(failure:Exception){if(failure is CancellationException&&failure !is TimeoutCancellationException)throw failure;message="HyperImmersive chưa mở được bản xem trước"}}}}
+    fun set(key:String,value:String){
+        if(!BuildConfig.HOST_INTEGRATED||key.startsWith("manager.")){
+            values[key]=value;preferences.edit().putString(key,value).apply();return
+        }
+        if(!connected)return
+        values[key]=value;pending[key]=value
+        if(writing?.isActive==true)return
+        writing=scope.launch{mutex.withLock{
+            while(pending.isNotEmpty()){
+                val (next,requested)=pending.entries.first().toPair()
+                try{
+                    val reply=hostRequest(context,"change",next,requested)
+                    if(pending[next]==requested)pending.remove(next)
+                    accept(reply)
+                }catch(failure:Exception){
+                    if(failure is CancellationException&&failure !is TimeoutCancellationException)throw failure
+                    pending.clear();confirmed.forEach{(k,v)->values[k]=v}
+                    connected=false;message="Chưa xác nhận lưu · Mở lại từ Cài đặt để kết nối lại"
+                }
+            }
+        }}
+    }
 }
 
 private val pages=linkedMapOf(
@@ -67,10 +113,25 @@ private val pages=linkedMapOf(
     "appearance" to "Tùy chỉnh Soft Glass", "extensions" to "Tiện ích mở rộng")
 
 class MainActivity:ComponentActivity(){
+    private lateinit var store:UiStore
+    override fun getClassLoader():ClassLoader=javaClass.classLoader!!
+    override fun attachBaseContext(base:Context){
+        if(BuildConfig.HOST_INTEGRATED){
+            val path=System.getProperty("mixi.ui.module.path")?:error("Host UI loader required")
+            val loader=android.content.res.loader.ResourcesLoader()
+            android.os.ParcelFileDescriptor.open(java.io.File(path),android.os.ParcelFileDescriptor.MODE_READ_ONLY).use{
+                loader.addProvider(android.content.res.loader.ResourcesProvider.loadFromApk(it))
+            }
+            val isolated=base.createConfigurationContext(android.content.res.Configuration(base.resources.configuration))
+            isolated.resources.addLoaders(loader)
+            super.attachBaseContext(object:android.content.ContextWrapper(isolated){override fun getClassLoader()=this@MainActivity.classLoader})
+        }else super.attachBaseContext(base)
+    }
     override fun onCreate(savedInstanceState:Bundle?){
+        if(BuildConfig.HOST_INTEGRATED)setTheme(R.style.Theme_Mixi)
         super.onCreate(savedInstanceState);enableEdgeToEdge()
         window.isNavigationBarContrastEnforced=false
-        val store=UiStore(applicationContext)
+        store=UiStore(applicationContext,lifecycleScope)
         setContent {
             val appearance=store.values["manager.theme"]?:"0"
             val dark=when(appearance){"1"->false;"2"->true;else->isSystemInDarkTheme()}
@@ -83,6 +144,7 @@ class MainActivity:ComponentActivity(){
             MiuixTheme(colors=if(dark)darkColorScheme() else lightColorScheme()){Manager(store,this)}
         }
     }
+    override fun onResume(){super.onResume();if(::store.isInitialized)store.refresh()}
 }
 
 private data class Screen(val route:String):NavKey
@@ -142,7 +204,7 @@ private data class Screen(val route:String):NavKey
                 CompositionLocalProvider(LocalMenuBackdrop provides backdrop){
                 when(route){
                     "tab0"->{
-                        FrameworkStatusCard()
+                        FrameworkStatusCard(store)
                         Group("Tính năng"){
                             ArrowPreference(title="HyperMusicCover Enhanced",summary="Ảnh bìa, lời bài hát và Lockscreen Island",onClick={open("hmc")})
                             ArrowPreference(title="Tùy chỉnh Soft Glass",summary="Độ mờ, độ trong và phản chiếu",onClick={open("appearance")})
@@ -171,12 +233,12 @@ private data class Screen(val route:String):NavKey
                                 found.forEach{option->ArrowPreference(title=option.title,summary=pages[option.page],onClick={open(option.page)})}
                             }
                         }
-                        PreviewNote()
+                        PreviewNote(store)
                     }
                     "tab2"->{
                         Group("Mixi Framework"){
                             BasicComponent(title="Manager",summary=BuildConfig.VERSION_NAME)
-                            BasicComponent(title="Framework",summary="Chưa kết nối")
+                            BasicComponent(title="Framework",summary=store.message)
                             BasicComponent(title="ROM Maintainer",summary="Kien Vu")
                         }
                         Group("Giao diện"){
@@ -188,8 +250,8 @@ private data class Screen(val route:String):NavKey
                         }
                     }
                     "hmc"->{
-                        PreviewNote()
-                        Card {SwitchPreference(title="HyperMusicCover Enhanced",summary="Lựa chọn xem trước trên Manager",checked=store.values["preview.hmc"]!="false",onCheckedChange={store.set("preview.hmc",it.toString())})}
+                        PreviewNote(store)
+                        Card {SwitchPreference(title="HyperMusicCover Enhanced",summary="Giữ các tùy chỉnh khi tắt; dùng cơ chế tải lại hiện có",checked=store.values["enhanced.master"]!="false",onCheckedChange={store.set("enhanced.master",it.toString())})}
                         Group("Cá nhân hóa"){
                             pages.filterKeys{it !in listOf("appearance","extensions")}.forEach{(page,name)->
                                 ArrowPreference(title=name,summary="${store.byPage[page].orEmpty().size} tùy chỉnh",onClick={open(page)})
@@ -206,7 +268,7 @@ private data class Screen(val route:String):NavKey
                     "appearance"->SoftGlassPage(store)
                     "immersive"->HyperImmersivePage(store)
                     else->{
-                        PreviewNote()
+                        PreviewNote(store)
                         if(route=="island")IslandDemo(colorOs=(store.values["mini.pillStyle"]?:"0")=="0")
                         val controls=store.byPage[route].orEmpty()
                         controls.groupBy { option ->
@@ -234,21 +296,21 @@ private data class Screen(val route:String):NavKey
     }
 }
 
-@Composable private fun FrameworkStatusCard(){
+@Composable private fun FrameworkStatusCard(store:UiStore){
     val tint=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f)
     Box(Modifier.fillMaxWidth().padding(horizontal=8.dp).heightIn(min=156.dp)
         .background(MiuixTheme.colorScheme.surfaceContainer,RoundedCornerShape(28.dp))){
         Icon(MiuixIcons.Info,contentDescription=null,tint=tint.copy(alpha=.12f),modifier=Modifier.align(Alignment.CenterEnd).padding(end=16.dp).size(112.dp))
         Column(Modifier.padding(22.dp).padding(end=70.dp),verticalArrangement=Arrangement.spacedBy(10.dp)){
             Text("MIXI",fontSize=12.sp,modifier=Modifier.background(tint.copy(alpha=.12f),RoundedCornerShape(10.dp)).padding(horizontal=10.dp,vertical=4.dp))
-            Text("Chưa kết nối",fontSize=26.sp)
-            Text("Framework · Chưa xác nhận",fontSize=13.sp,color=tint)
+            Text(if(store.connected)"Đã kết nối" else "Chưa kết nối",fontSize=26.sp)
+            Text(if(store.hmcAlive)"HMC · Runtime đã phản hồi" else "HMC · Chưa xác nhận runtime",fontSize=13.sp,color=tint)
         }
     }
-    Text("Bản giao diện · Các lựa chọn chưa áp dụng lên hệ thống",fontSize=12.sp,color=tint,modifier=Modifier.padding(horizontal=12.dp))
+    Text(store.message,fontSize=12.sp,color=tint,modifier=Modifier.padding(horizontal=12.dp))
 }
 
-@Composable private fun PreviewNote(){Card{BasicComponent(title="Chưa kết nối framework",summary="Các lựa chọn hiện chỉ lưu trong Manager, chưa áp dụng lên hệ thống.")}}
+@Composable private fun PreviewNote(store:UiStore){Card{BasicComponent(title=if(store.connected)"Cấu hình MixiHost" else "Chưa kết nối framework",summary=store.message)}}
 @Composable internal fun Group(title:String,content:@Composable ColumnScope.()->Unit){
     Column(verticalArrangement=Arrangement.spacedBy(8.dp)){
         Text(title,modifier=Modifier.padding(start=12.dp,top=4.dp),fontSize=14.sp,color=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f))
@@ -268,8 +330,17 @@ private data class Screen(val route:String):NavKey
         }
         else->Column(Modifier.padding(16.dp)){
             Text(option.title)
-            if(option.secret) Text("Khóa API chưa được lưu ở bản xem trước",fontSize=14.sp,color=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f))
-            else TextField(value=current,onValueChange={store.set(option.key,it.take(4096))},label=option.title,singleLine=true,modifier=Modifier.fillMaxWidth())
+            if(option.secret&&!BuildConfig.HOST_INTEGRATED) Text("Khóa API chưa được lưu ở bản xem trước",fontSize=14.sp,color=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f))
+            else {
+                var text by remember(option.key,current){mutableStateOf(current)}
+                val focus=LocalFocusManager.current
+                fun commit(){if(text!=current&&(!option.key.endsWith("waveCustom")||text.matches(Regex("#[0-9A-Fa-f]{8}"))))store.set(option.key,text)}
+                TextField(value=text,onValueChange={text=it.take(4096)},label=option.title,singleLine=true,
+                    visualTransformation=if(option.secret)androidx.compose.ui.text.input.PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
+                    keyboardOptions=androidx.compose.foundation.text.KeyboardOptions(imeAction=androidx.compose.ui.text.input.ImeAction.Done,keyboardType=if(option.secret)androidx.compose.ui.text.input.KeyboardType.Password else androidx.compose.ui.text.input.KeyboardType.Text,autoCorrectEnabled=!option.secret),
+                    keyboardActions=androidx.compose.foundation.text.KeyboardActions(onDone={commit();focus.clearFocus()}),
+                    modifier=Modifier.fillMaxWidth().onFocusChanged{if(!it.hasFocus)commit()})
+            }
         }
     }
 }
