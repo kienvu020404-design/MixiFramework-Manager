@@ -1,0 +1,12 @@
+{
+  "version": "0.1.0-ui",
+  "package": "com.mixi.manager",
+  "sha256": "ff5ca33e13cf46ecc907c7ccaf6d9d5d731dac85d5e9391ade51b1846ec02ecf",
+  "build": "assembleDebug PASS",
+  "lint": "0 errors,3 warnings (legacy image silhouette,2 KTX style suggestions)",
+  "catalog": "92 unique fields,10 groups/defaults/enums/ranges validated",
+  "signature": "apksigner v2 verifies",
+  "scope": "UI/local preview only; no root/framework binder/configuration writes,hook/native runtime or background service",
+  "source": "Miuix0.9.4 pinned; original Mixi icon reused without image changes",
+  "visual_acceptance": "not yet installed or inspected on phone; user manual UI review pending"
+}
