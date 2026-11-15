@@ -13,5 +13,8 @@ dependencies {
  implementation("top.yukonga.miuix.kmp:miuix-ui-android:0.9.4")
  implementation("top.yukonga.miuix.kmp:miuix-preference-android:0.9.4")
  implementation("top.yukonga.miuix.kmp:miuix-icons-android:0.9.4")
- implementation("top.yukonga.miuix.kmp:miuix-nav-android:0.9.4")
+ constraints {
+  implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.11.0")
+  implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.11.0")
+ }
 }
