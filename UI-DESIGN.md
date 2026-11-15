@@ -60,3 +60,6 @@ Tick inset16dp and circle stroke inside its Canvas. Connected card selects light
 
 ## 0.9.4 review and Apply
 Remove project GitHub link, keep attribution under Ghi nhận & Giấy phép. Stop unused status probes and offscreen Island animation; scope preview/Immersive reads to RESUMED page lifecycle. Retain serialized writes and validation. Extensions Apply explicitly describes SystemUI reload, serializes after pending drain, flushes current battery booleans and prevents reload after save failure/expiry. No Apply on Glass. Local transport fixtures pass; phone acceptance pending.
+
+## Manager1.0.0 / Framework1.0.5
+Version/display-only release after benchmark decision. Manager reports1.0.0; Framework row reads installed com.mixi.host version off the UI thread on Info composition, with an unknown fallback rather than hardcoded success. Host/module/settings metadata report1.0.5. Restore icon after-hook because the SettingsOpt A/B samples showed no gain. Preserve all0.9.4 features and lifecycle/cache guards.

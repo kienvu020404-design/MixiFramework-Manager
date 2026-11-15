@@ -1,6 +1,6 @@
 # Mixi Framework Manager
 
-UI for MixiHost built with Kotlin, Jetpack Compose and **Miuix by YuKongA**, pinned to 0.9.4. Android15+ / targetAndroid17. Milestone `0.9.0-host-ui`: one installed `com.mixi.host` APK; the standalone `com.mixi.manager` build remains a development preview only.
+UI for MixiHost built with Kotlin, Jetpack Compose and **Miuix by YuKongA**, pinned to 0.9.4. Android15+ / targetAndroid17. Manager `1.0.0` / Framework `1.0.5`: one installed `com.mixi.host` APK; the standalone `com.mixi.manager` build remains a development preview only.
 
 ## Implemented
 
@@ -75,3 +75,6 @@ Current test corrects light-mode card contrast and tick inset, reduces redundant
 
 ## 0.9.4 review / Extensions Apply
 Project-source UI link removed; license credits retained. No unused Home HMC/Immersive status probes, page reads and original Island animation follow visibility/lifecycle. Important error logs and validation remain. Extensions has an Apply action for the battery controls: it saves current values and uses the existing SystemUI reload only on user click; Glass remains live. See host-integration/REVIEW-094.md and verification for tests/limits. No phone installation or runtime acceptance is claimed for0.9.4.
+
+## Manager1.0.0 / Framework1.0.5 test
+Only versions and Info display changed from0.9.4, plus restoration of the accepted Settings icon path. Info displays Manager BuildConfig version and actual installed Host version queried off main thread. Host manifest, module.prop and embedded settings metadata all report1.0.5. No original Settings APK/ART/compiler-cache change. The SettingsOpt experiment did not show a launch improvement and is rejected; see SETTINGS-BENCHMARK.json. Test: Mixi-v1.0.5-Manager-1.0.0-Test.zip. Manual installation and visual acceptance pending.

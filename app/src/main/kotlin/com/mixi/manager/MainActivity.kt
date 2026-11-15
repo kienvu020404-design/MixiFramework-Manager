@@ -35,6 +35,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.Modifier
@@ -247,9 +248,15 @@ private data class Screen(val route:String):NavKey
                         PreviewNote(store)
                     }
                     "tab2"->{
+                        val infoContext=LocalContext.current
+                        val frameworkVersion by produceState<String?>(null,infoContext){
+                            if(BuildConfig.HOST_INTEGRATED)value=withContext(Dispatchers.IO){
+                                runCatching{infoContext.packageManager.getPackageInfo("com.mixi.host",0).versionName}.getOrNull()
+                            }
+                        }
                         Group("Mixi Framework"){
                             BasicComponent(title="Manager",summary=BuildConfig.VERSION_NAME)
-                            BasicComponent(title="Framework",summary=if(store.connected)"Đã kết nối" else "Chưa kết nối")
+                            BasicComponent(title="Framework",summary=frameworkVersion?:"Chưa xác nhận")
                             BasicComponent(title="ROM Maintainer",summary="Kien Vu")
                         }
                         Group("Giao diện"){
