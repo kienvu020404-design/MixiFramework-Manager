@@ -66,3 +66,6 @@ Install only the resulting `Mixi-v1.0.4-HostUI-0.9.0-Test.zip` through the modul
 ## Credits
 
 [Miuix](https://github.com/compose-miuix-ui/miuix) — YuKongA and contributors, Apache-2.0. HMC/Enhanced — zyl6932/Lewewe, AGPL-3.0. HyperModifier — AritxOnly. See LICENSE/NOTICE and bundled attribution files. Original feature APKs are not committed in this UI repository; the test assembly retains the accepted Host payload unchanged.
+
+## 0.9.1 preview test
+Current test adds a green connection check and removes routine saved/runtime notes. The preview now attempts the device wallpaper plus OEM Glass using the original HyperModifier recipe. It no longer draws the sample landscape or Miuix approximation. Wallpaper/helper/API unavailability is shown rather than silently substituting another renderer. Device validation remains required. Artifact: Mixi-v1.0.4-HostUI-0.9.1-Test.zip; previous0.9.0 ZIP remains available for rollback.

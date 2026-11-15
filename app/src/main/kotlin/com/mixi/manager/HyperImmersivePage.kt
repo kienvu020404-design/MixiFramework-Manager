@@ -63,7 +63,7 @@ internal fun standbySeconds(text:String,minutes:Boolean,maximum:Int):Int? {
         if(fields.filter{it.kind=="time"}.any{store.value(it)=="0"})Text("Đặt không giới hạn có thể làm máy nóng hơn và tăng nguy cơ lưu ảnh màn hình.",fontSize=12.sp,color=Color(0xFFD64545),modifier=Modifier.padding(horizontal=16.dp,vertical=10.dp))
         BasicComponent(title="Xem trước StandBy",summary=if(store.connected)"Mở StandBy ngay" else "Chưa kết nối runtime",onClick={store.preview()})
     }
-    Text(store.message,fontSize=12.sp,color=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f),modifier=Modifier.padding(horizontal=12.dp))
+
 }
 
 @Composable private fun StandbyTimeRow(field:Option,store:UiStore,enabled:Boolean,title:String,summary:String){

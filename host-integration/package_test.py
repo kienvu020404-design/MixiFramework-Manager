@@ -11,8 +11,8 @@ apk=(out/'MixiHost-UI-Test.apk').read_bytes()
 assert sha(apk)==verification['hostSha256']
 with zipfile.ZipFile(baseline) as z:parts={n:z.read(n) for n in z.namelist()}
 host='system/system_ext/priv-app/MixiHost/MixiHost.apk';old=parts.copy();parts[host]=apk
-parts['module.prop']=parts['module.prop'].decode().replace('name=Mixi Framework 1.0.4','name=Mixi Framework - Host UI Test').replace('version=1.0.4','version=1.0.4-ui-test').replace('versionCode=100400','versionCode=100401').encode()
-parts['HUONG-DAN.txt']=('MixiHost UI test - UI 0.9.0 / runtime 1.0.4\n'
+parts['module.prop']=parts['module.prop'].decode().replace('name=Mixi Framework 1.0.4','name=Mixi Framework - Host UI Test').replace('version=1.0.4','version=1.0.4-ui-test').replace('versionCode=100400','versionCode=100402').encode()
+parts['HUONG-DAN.txt']=('MixiHost UI test - UI 0.9.1 / runtime 1.0.4\n'
  'Chỉ cài ZIP qua trình quản lý module rồi reboot thủ công. Không cài riêng APK Host.\n'
  'Settings → Mixi Framework sẽ mở UI trong MixiHost; không có APK Manager cài thêm, không có icon launcher mới.\n'
  'Giữ cấu hình thật đang lưu; không nhập cấu hình xem trước Manager. Soft Glass tự gửi khi thả thanh kéo.\n'
@@ -22,7 +22,7 @@ parts['HUONG-DAN.txt']=('MixiHost UI test - UI 0.9.0 / runtime 1.0.4\n'
  'Chưa có kiểm thử cài/boot/hiển thị trên điện thoại cho bản tích hợp này. Không dùng làm gói ROM chính thức.\n'
  'Rollback: cài lại Mixi-v1.0.4-Native-Test.zip đã nghiệm thu hoặc tắt module test; reboot thủ công. Không xóa dữ liệu ứng dụng.\n').encode()
 parts['SHA256SUMS']=''.join(sha(b)+'  '+n+'\n' for n,b in parts.items() if n.startswith('system/')).encode()
-artifact=root/'out/Mixi-v1.0.4-HostUI-0.9.0-Test.zip'
+artifact=root/'out/Mixi-v1.0.4-HostUI-0.9.1-Test.zip'
 with zipfile.ZipFile(artifact,'w',zipfile.ZIP_DEFLATED) as z:
  for n,b in parts.items():z.writestr(n,b)
 with zipfile.ZipFile(artifact) as z:

@@ -62,4 +62,7 @@ with zipfile.ZipFile(out/'MixiHost-UI-Test.apk') as host:
 verification=json.loads((out/'verification.json').read_text())
 verification['localTests']='92 catalog defaults/invalid values; source-extracted acknowledgement race; auth/deadline/extraction source contracts; nested APK CRC PASS'
 (out/'verification.json').write_text(json.dumps(verification,indent=2)+'\n',encoding='utf-8')
+preview=(manager/'app/src/main/kotlin/com/mixi/manager/SoftGlassPreview.kt').read_text(encoding='utf-8')
+assert 'textureBlur(' not in preview and 'setMiGlass' in preview
+assert 'loadPreview()' in preview and 'previewAssets' in bridge
 print('HOST_UI_LOCAL_CHECKS_PASS')

@@ -31,6 +31,9 @@ public final class ManagerBridge {
                         Bundle reply; int code;
                         try {
                             android.content.SharedPreferences saved = app.getSharedPreferences("mixi_enhanced_r1",Context.MODE_PRIVATE);
+                            if ("previewAssets".equals(op)) {
+                                reply = previewAssets(app); code = 1;
+                            } else {
                             if ("change".equals(op)) {
                                 if (key.equals("enhanced.master")) master(app,Boolean.parseBoolean(value));
                                 else {
@@ -40,6 +43,7 @@ public final class ManagerBridge {
                             } else if ("preview".equals(op)) ImmersiveClient.call(app,"preview",null);
                             else EnhancedProtocol.replay(app,saved);
                             reply = snapshot(app,saved,"query".equals(op)); code = 1;
+                            }
                         } catch (Exception failure) {
                             reply = new Bundle(); reply.putString("error",failure.getClass().getSimpleName()); code = -1;
                         }
@@ -54,12 +58,29 @@ public final class ManagerBridge {
         attached = true;
     }
     static void validate(String op,String key,String value) {
-        if ("query".equals(op) || "preview".equals(op)) return;
+        if ("query".equals(op) || "preview".equals(op) || "previewAssets".equals(op)) return;
         if (!"change".equals(op) || key == null || value == null) throw new IllegalArgumentException("Invalid request");
         if (key.equals("enhanced.master") && (value.equals("true") || value.equals("false"))) return;
         for (EnhancedCatalog.Field field : EnhancedCatalog.FIELDS)
             if (field.key.equals(key) && field.accepts(value)) return;
         throw new IllegalArgumentException("Unknown setting/value");
+    }
+    private static Bundle previewAssets(Context app) throws Exception {
+        Bundle result=new Bundle();
+        android.graphics.drawable.Drawable wallpaper=android.app.WallpaperManager.getInstance(app).getDrawable();
+        if(wallpaper==null)throw new IllegalStateException("Wallpaper unavailable");
+        int width=480,height=Math.max(1,Math.min(1200,wallpaper.getIntrinsicHeight()*width/Math.max(1,wallpaper.getIntrinsicWidth())));
+        android.graphics.Bitmap bitmap=android.graphics.Bitmap.createBitmap(width,height,android.graphics.Bitmap.Config.ARGB_8888);
+        wallpaper.setBounds(0,0,width,height);wallpaper.draw(new android.graphics.Canvas(bitmap));
+        java.io.ByteArrayOutputStream output=new java.io.ByteArrayOutputStream();
+        bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG,75,output);bitmap.recycle();
+        if(output.size()>256*1024)throw new IllegalStateException("Wallpaper preview too large");
+        result.putByteArray("wallpaper",output.toByteArray());
+        String apk=app.getPackageManager().getApplicationInfo("com.aritxonly.myhypermodifier",0).sourceDir;
+        ClassLoader loader=new dalvik.system.DexClassLoader(apk,null,null,ClassLoader.getSystemClassLoader().getParent());
+        float[] recipe=(float[])loader.loadClass("d52").getMethod("r").invoke(null);
+        if(recipe==null||recipe.length!=42)throw new IllegalStateException("Glass recipe mismatch");
+        result.putFloatArray("recipe",recipe);return result;
     }
     private static void master(Context app,boolean enabled) {
         Bundle edit = new Bundle(); edit.putBoolean("enabled",enabled);

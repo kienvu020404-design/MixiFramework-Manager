@@ -29,9 +29,9 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
     fun current(key:String):String= drafts[key]?:store.values[key]?:controls.first{it.key==key}.initial
     fun amount(key:String,max:Float)=current(key).toFloatOrNull()?.coerceIn(0f,max)?:0f
     val enabled=store.values["appearance.enabled"]=="true"
-    Card{BasicComponent(title="Xem trước Soft Glass",summary="Minh họa trong app; chưa phải vật liệu HyperOS chính xác. ${store.message}")}
+    LaunchedEffect(store.connected){if(store.connected)store.loadPreview()}
     Group("Soft Glass"){controls.filter{it.kind=="bool"}.forEach{OptionRow(it,store)}}
-    GlassSample(enabled,amount("appearance.blur",100f),amount("appearance.background",200f),
+    GlassSample(store,enabled,amount("appearance.blur",100f),amount("appearance.background",200f),
         amount("appearance.opacity",100f),amount("appearance.reflection",200f))
     Group("Độ mờ"){
         controls.filter{it.key in listOf("appearance.blur","appearance.background")}.forEach{
@@ -43,47 +43,42 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
             OptionRow(it,store){key,value->drafts[key]=value}
         }
     }
-    Text(if(BuildConfig.HOST_INTEGRATED)"Kéo để xem minh họa · Thả tay để gửi cấu hình qua Settings" else "Kéo để xem minh họa · Thả tay để lưu bản xem trước",fontSize=13.sp,
-        color=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f),modifier=Modifier.padding(horizontal=12.dp))
 }
-
-@Composable private fun GlassSample(enabled:Boolean,blur:Float,background:Float,opacity:Float,reflection:Float){
-    val backdrop=rememberLayerBackdrop{drawContent()}
-    val surface=MiuixTheme.colorScheme.surfaceContainer
-    val material=MiuixTheme.colorScheme.onSurface
-    Card{
-        Row(Modifier.fillMaxWidth().padding(18.dp),horizontalArrangement=Arrangement.SpaceBetween){
-            Text("Mẫu vật liệu",fontSize=17.sp)
-            Text(if(enabled)"Đang minh họa" else "Tùy chỉnh đang tắt",fontSize=12.sp,color=material.copy(alpha=.55f))
-        }
-        Box(Modifier.fillMaxWidth().height(240.dp).clip(RoundedCornerShape(24.dp))){
-            // Static locally drawn scene; no network, frame clock or continuously animated wallpaper.
-            Canvas(Modifier.matchParentSize().layerBackdrop(backdrop)){
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF68A9D1),Color(0xFFE9D4AF),Color(0xFF41778C))))
-                drawCircle(Color(0xFFFCE9B0),size.width*.1f,Offset(size.width*.76f,size.height*.24f))
-                val hills=Path().apply{moveTo(0f,size.height*.57f);cubicTo(size.width*.25f,size.height*.28f,size.width*.34f,size.height*.75f,size.width*.7f,size.height*.44f);lineTo(size.width,size.height*.52f);lineTo(size.width,size.height);lineTo(0f,size.height);close()}
-                drawPath(hills,Color(0xFF698C82))
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF77A6B1),Color(0xFF264E69)),startY=size.height*.62f),topLeft=Offset(0f,size.height*.62f),size=Size(size.width,size.height*.38f))
-                drawRect(Color(0xFFEBDBBB),Offset(size.width*.22f,size.height*.41f),Size(size.width*.21f,size.height*.18f))
-                val roof=Path().apply{moveTo(size.width*.18f,size.height*.42f);lineTo(size.width*.32f,size.height*.29f);lineTo(size.width*.47f,size.height*.42f);close()}
-                drawPath(roof,Color(0xFF9C6D56))
-                drawRect(Color(0xFF527B8F),Offset(size.width*.29f,size.height*.48f),Size(size.width*.05f,size.height*.11f))
-                repeat(9){index->val y=size.height*(.65f+index*.035f);drawLine(Color.White.copy(alpha=.15f),Offset(size.width*(index%3)*.13f,y),Offset(size.width*(.45f+(index%4)*.15f),y),1.5f)}
-            }
-            val shape=RoundedCornerShape(28.dp)
-            val tint=if(enabled) .18f+opacity/100f*.6f else .85f
-            val panel=if(enabled)Modifier.textureBlur(backdrop=backdrop,shape=shape,
-                blurRadius=blur*.35f+background*.08f,
-                colors=BlurDefaults.blurColors(blendColors=listOf(BlendColorEntry(color=surface.copy(alpha=tint)))))
-                else Modifier.background(surface.copy(alpha=tint),shape)
-            Column(Modifier.align(Alignment.BottomCenter).padding(18.dp).fillMaxWidth()
-                .then(panel)
-                .border(if(enabled)1.dp else .5.dp,Brush.linearGradient(listOf(Color.White.copy(alpha=if(enabled).15f+reflection/200f*.65f else .1f),Color.White.copy(alpha=.06f))),shape)
-                .padding(horizontal=22.dp,vertical=24.dp),verticalArrangement=Arrangement.spacedBy(6.dp)){
-                Text("Soft Glass",fontSize=22.sp,color=material)
-                Text("Minh họa trực tiếp trong Manager",fontSize=13.sp,color=material.copy(alpha=.65f))
-            }
-        }
-        Text("Minh họa UI · Chưa phải renderer HyperOS",fontSize=12.sp,color=material.copy(alpha=.55f),modifier=Modifier.padding(16.dp))
+@Composable private fun GlassSample(store:UiStore,enabled:Boolean,blur:Float,background:Float,opacity:Float,reflection:Float){
+    val bytes=store.previewAssets.getByteArray("wallpaper")
+    val recipe=store.previewAssets.getFloatArray("recipe")
+    val bitmap by produceState<android.graphics.Bitmap?>(null,bytes){
+        value=kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default){bytes?.let{android.graphics.BitmapFactory.decodeByteArray(it,0,it.size)}}
     }
+    var failed by remember{mutableStateOf(false)}
+    if(bitmap==null||recipe==null){
+        Card{BasicComponent(title="Xem trước Soft Glass",summary="Chưa đọc được hình nền hoặc vật liệu gốc trên máy")}
+        return
+    }
+    androidx.compose.ui.viewinterop.AndroidView(
+        modifier=Modifier.fillMaxWidth().height(240.dp).clip(RoundedCornerShape(24.dp)),
+        factory={context->android.widget.FrameLayout(context).apply{
+            addView(android.widget.ImageView(context).apply{scaleType=android.widget.ImageView.ScaleType.CENTER_CROP},android.widget.FrameLayout.LayoutParams(-1,-1))
+            addView(android.widget.TextView(context).apply{
+                text="Soft Glass";textSize=22f;setTextColor(android.graphics.Color.WHITE)
+                val d=resources.displayMetrics.density
+                setPadding((24*d).toInt(),(24*d).toInt(),(24*d).toInt(),(24*d).toInt())
+                this.background=android.graphics.drawable.GradientDrawable().apply{setColor(android.graphics.Color.TRANSPARENT);cornerRadius=28*d};clipToOutline=true
+            },android.widget.FrameLayout.LayoutParams(-1,-2,android.view.Gravity.BOTTOM).apply{setMargins(20,20,20,20)})
+        }},onReset=null,onRelease={frame->
+            try{android.view.View::class.java.getMethod("setMiGlass",FloatArray::class.java).invoke(frame.getChildAt(1),*arrayOfNulls<Any>(1))}catch(_:ReflectiveOperationException){}
+        },update={frame->
+            (frame.getChildAt(0) as android.widget.ImageView).setImageBitmap(bitmap)
+            val panel=frame.getChildAt(1)
+            try{
+                val native=recipe.clone();native[14]=opacity/100f;native[24]=reflection/100f
+                android.view.View::class.java.getMethod("setMiBackgroundBlurMode",Int::class.javaPrimitiveType).invoke(panel,if(enabled)1 else 0)
+                android.view.View::class.java.getMethod("setMiViewBlurMode",Int::class.javaPrimitiveType).invoke(panel,if(enabled)1 else 0)
+                android.view.View::class.java.getMethod("setMiGlass",FloatArray::class.java).invoke(panel,if(enabled)native else null)
+                android.view.View::class.java.getMethod("setMiGlassBlurRadius",Int::class.javaPrimitiveType,Int::class.javaPrimitiveType).invoke(panel,blur.toInt(),blur.toInt())
+                android.view.View::class.java.getMethod("setMiBackgroundBlurRadius",Int::class.javaPrimitiveType).invoke(panel,(blur*background/100f).toInt())
+                failed=false
+            }catch(_:ReflectiveOperationException){failed=true}
+        })
+    if(failed)Text("ROM chưa cho phép vẽ Glass gốc trong cửa sổ này",fontSize=12.sp)
 }

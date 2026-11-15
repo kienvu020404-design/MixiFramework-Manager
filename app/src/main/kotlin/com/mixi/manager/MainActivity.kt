@@ -17,6 +17,7 @@ import kotlinx.coroutines.sync.withLock
 import top.yukonga.miuix.kmp.anim.folmeSpring
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
@@ -63,6 +64,8 @@ class UiStore(private val context:Context,private val scope:CoroutineScope) {
     val byPage:Map<String,List<Option>> = catalog.groupBy{it.page}
     fun value(option:Option)=values[option.key]?:option.initial
     var connected by mutableStateOf(false);private set
+    var previewAssets by mutableStateOf(android.os.Bundle());private set
+    fun loadPreview(){if(connected)scope.launch{mutex.withLock{try{previewAssets=hostRequest(context,"previewAssets")}catch(failure:Exception){if(failure is CancellationException&&failure !is TimeoutCancellationException)throw failure;previewAssets=android.os.Bundle()}}}}
     var hmcAlive by mutableStateOf(false);private set
     var message by mutableStateOf(if(BuildConfig.HOST_INTEGRATED)"Đang kết nối Settings…" else "Bản xem trước · Chưa kết nối framework");private set
     var immersive by mutableStateOf(android.os.Bundle());private set
@@ -238,7 +241,7 @@ private data class Screen(val route:String):NavKey
                     "tab2"->{
                         Group("Mixi Framework"){
                             BasicComponent(title="Manager",summary=BuildConfig.VERSION_NAME)
-                            BasicComponent(title="Framework",summary=store.message)
+                            BasicComponent(title="Framework",summary=if(store.connected)"Đã kết nối" else "Chưa kết nối")
                             BasicComponent(title="ROM Maintainer",summary="Kien Vu")
                         }
                         Group("Giao diện"){
@@ -299,18 +302,18 @@ private data class Screen(val route:String):NavKey
 @Composable private fun FrameworkStatusCard(store:UiStore){
     val tint=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f)
     Box(Modifier.fillMaxWidth().padding(horizontal=8.dp).heightIn(min=156.dp)
-        .background(MiuixTheme.colorScheme.surfaceContainer,RoundedCornerShape(28.dp))){
-        Icon(MiuixIcons.Info,contentDescription=null,tint=tint.copy(alpha=.12f),modifier=Modifier.align(Alignment.CenterEnd).padding(end=16.dp).size(112.dp))
+        .background(if(store.connected)Color(0xFF203D2B) else MiuixTheme.colorScheme.surfaceContainer,RoundedCornerShape(28.dp))){
+        Canvas(Modifier.align(Alignment.CenterEnd).size(128.dp)){val c=if(store.connected)Color(0xFF70D478) else Color.Gray;drawCircle(c,style=androidx.compose.ui.graphics.drawscope.Stroke(9.dp.toPx()));if(store.connected){drawPath(androidx.compose.ui.graphics.Path().apply{moveTo(size.width*.26f,size.height*.51f);lineTo(size.width*.43f,size.height*.67f);lineTo(size.width*.77f,size.height*.33f)},c,style=androidx.compose.ui.graphics.drawscope.Stroke(10.dp.toPx(),cap=androidx.compose.ui.graphics.StrokeCap.Round,join=androidx.compose.ui.graphics.StrokeJoin.Round))}}
         Column(Modifier.padding(22.dp).padding(end=70.dp),verticalArrangement=Arrangement.spacedBy(10.dp)){
             Text("MIXI",fontSize=12.sp,modifier=Modifier.background(tint.copy(alpha=.12f),RoundedCornerShape(10.dp)).padding(horizontal=10.dp,vertical=4.dp))
             Text(if(store.connected)"Đã kết nối" else "Chưa kết nối",fontSize=26.sp)
-            Text(if(store.hmcAlive)"HMC · Runtime đã phản hồi" else "HMC · Chưa xác nhận runtime",fontSize=13.sp,color=tint)
+            Text("Mixi Framework",fontSize=13.sp,color=tint)
         }
     }
-    Text(store.message,fontSize=12.sp,color=tint,modifier=Modifier.padding(horizontal=12.dp))
+
 }
 
-@Composable private fun PreviewNote(store:UiStore){Card{BasicComponent(title=if(store.connected)"Cấu hình MixiHost" else "Chưa kết nối framework",summary=store.message)}}
+@Composable private fun PreviewNote(store:UiStore){if(!store.connected)Card{BasicComponent(title="Chưa kết nối framework",summary="Mở lại từ Cài đặt → Mixi Framework")}}
 @Composable internal fun Group(title:String,content:@Composable ColumnScope.()->Unit){
     Column(verticalArrangement=Arrangement.spacedBy(8.dp)){
         Text(title,modifier=Modifier.padding(start=12.dp,top=4.dp),fontSize=14.sp,color=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f))
