@@ -69,3 +69,6 @@ Install only the resulting `Mixi-v1.0.4-HostUI-0.9.0-Test.zip` through the modul
 
 ## 0.9.1 preview test
 Current test adds a green connection check and removes routine saved/runtime notes. The preview now attempts the device wallpaper plus OEM Glass using the original HyperModifier recipe. It no longer draws the sample landscape or Miuix approximation. Wallpaper/helper/API unavailability is shown rather than silently substituting another renderer. Device validation remains required. Artifact: Mixi-v1.0.4-HostUI-0.9.1-Test.zip; previous0.9.0 ZIP remains available for rollback.
+
+## 0.9.3 test
+Current test corrects light-mode card contrast and tick inset, reduces redundant preview bitmap/native updates, disables preview Glass when offscreen/paused, and removes the unused native-panel lookup from the Mixi Settings hook. No original Settings APK changes. Before-only scroll/launch measurements: host-integration/BENCHMARK.json. After-install comparison is pending; do not treat source changes as measured speed gains.

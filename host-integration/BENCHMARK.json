@@ -11,5 +11,31 @@
   "backgroundCpuTicks": 2,
   "cpuPercentOneCore": 0.0666000666000666,
   "scope": "installed pre-optimization build; no after-install launch measurement",
-  "wakelock": "Observed system *launch* acquired/released; no Mixi-held lock identified in snapshot; not overnight battery proof"
+  "wakelock": "Observed system *launch* acquired/released; no Mixi-held lock identified in snapshot; not overnight battery proof",
+  "scrollBefore093": {
+    "home": {
+      "frames": 850,
+      "jank": 1,
+      "p95Ms": 8
+    },
+    "dense": {
+      "frames": 762,
+      "jank": 0,
+      "p95Ms": 7
+    },
+    "softGlass": {
+      "frames": 898,
+      "jank": 2,
+      "legacyJank": 36,
+      "p95Ms": 11,
+      "gpuP95Ms": 8
+    },
+    "protocol": "gfxinfo reset, confirmed foreground :manager, four 350ms swipes with one second rests; installed baseline, not093"
+  },
+  "stockSettingsWarmBefore093Ms": [
+    107,
+    98,
+    86
+  ],
+  "after093": "PENDING manual test installation; no claimed performance gain"
 }

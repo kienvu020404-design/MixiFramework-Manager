@@ -1,5 +1,12 @@
 package com.mixi.manager
 
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.findRootCoordinates
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,12 +58,22 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
         value=kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default){bytes?.let{android.graphics.BitmapFactory.decodeByteArray(it,0,it.size)}}
     }
     var failed by remember{mutableStateOf(false)}
+    var visible by remember{mutableStateOf(true)}
+    val lifecycle=LocalLifecycleOwner.current.lifecycle
+    var foreground by remember(lifecycle){mutableStateOf(lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))}
+    DisposableEffect(lifecycle){
+        val observer=LifecycleEventObserver{_,_->foreground=lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)}
+        lifecycle.addObserver(observer)
+        onDispose{lifecycle.removeObserver(observer)}
+    }
     if(bitmap==null||recipe==null){
         Card{BasicComponent(title="Xem trước Soft Glass",summary="Chưa đọc được hình nền hoặc vật liệu gốc trên máy")}
         return
     }
     androidx.compose.ui.viewinterop.AndroidView(
-        modifier=Modifier.fillMaxWidth().height(240.dp).clip(RoundedCornerShape(24.dp)),
+        modifier=Modifier.fillMaxWidth().height(240.dp).clip(RoundedCornerShape(24.dp)).onGloballyPositioned{coordinates->
+            val bounds=coordinates.boundsInWindow();visible=bounds.height>0f&&bounds.bottom>0f&&bounds.top<coordinates.findRootCoordinates().size.height
+        },
         factory={context->android.widget.FrameLayout(context).apply{
             addView(android.widget.ImageView(context).apply{scaleType=android.widget.ImageView.ScaleType.CENTER_CROP},android.widget.FrameLayout.LayoutParams(-1,-1))
             addView(android.widget.TextView(context).apply{
@@ -68,19 +85,24 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
         }},onReset=null,onRelease={frame->
             try{android.view.View::class.java.getMethod("setMiGlass",FloatArray::class.java).invoke(frame.getChildAt(1),*arrayOfNulls<Any>(1))}catch(_:ReflectiveOperationException){}
         },update={frame->
-            (frame.getChildAt(0) as android.widget.ImageView).setImageBitmap(bitmap)
+            val image=frame.getChildAt(0) as android.widget.ImageView
+            if(image.tag !== bitmap){image.setImageBitmap(bitmap);image.tag=bitmap}
+            val active=enabled&&visible&&foreground
             val panel=frame.getChildAt(1)
+            val configuration=listOf(active,blur,background,opacity,reflection,recipe)
+            if(panel.tag==configuration)return@AndroidView
             try{
                 val native=recipe.clone();native[14]=opacity/100f;native[24]=reflection/100f
                 android.view.View::class.java.getMethod("clearMiBackgroundBlendColor").invoke(panel)
-                android.view.View::class.java.getMethod("setPassWindowBlurEnabled",Boolean::class.javaPrimitiveType).invoke(panel,enabled)
-                android.view.View::class.java.getMethod("setMiViewBlurMode",Int::class.javaPrimitiveType).invoke(panel,if(enabled)1 else 0)
-                android.view.View::class.java.getMethod("setMiBackgroundBlurMode",Int::class.javaPrimitiveType).invoke(panel,if(enabled)1 else 0)
+                android.view.View::class.java.getMethod("setPassWindowBlurEnabled",Boolean::class.javaPrimitiveType).invoke(panel,active)
+                android.view.View::class.java.getMethod("setMiViewBlurMode",Int::class.javaPrimitiveType).invoke(panel,if(active)1 else 0)
+                android.view.View::class.java.getMethod("setMiBackgroundBlurMode",Int::class.javaPrimitiveType).invoke(panel,if(active)1 else 0)
                 android.view.View::class.java.getMethod("setMiBackgroundBlurRadius",Int::class.javaPrimitiveType).invoke(panel,(80f*background/100f).toInt())
-                if(enabled)android.view.View::class.java.getMethod("addMiBackgroundBlendColor",Int::class.javaPrimitiveType,Int::class.javaPrimitiveType).invoke(panel,0x1AFFFFFF,101)
+                if(active)android.view.View::class.java.getMethod("addMiBackgroundBlendColor",Int::class.javaPrimitiveType,Int::class.javaPrimitiveType).invoke(panel,0x1AFFFFFF,101)
                 android.view.View::class.java.getMethod("setMiGlassBlurRadius",Int::class.javaPrimitiveType,Int::class.javaPrimitiveType).invoke(panel,blur.toInt(),(blur*2f).toInt())
-                android.view.View::class.java.getMethod("setMiViewMaterialType",Int::class.javaPrimitiveType).invoke(panel,if(enabled)1 else 0)
-                android.view.View::class.java.getMethod("setMiGlass",FloatArray::class.java).invoke(panel,if(enabled)native else null)
+                android.view.View::class.java.getMethod("setMiViewMaterialType",Int::class.javaPrimitiveType).invoke(panel,if(active)1 else 0)
+                android.view.View::class.java.getMethod("setMiGlass",FloatArray::class.java).invoke(panel,if(active)native else null)
+                panel.tag=configuration
                 failed=false
             }catch(_:ReflectiveOperationException){failed=true}
         })

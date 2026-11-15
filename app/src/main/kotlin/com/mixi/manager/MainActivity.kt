@@ -22,6 +22,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -300,13 +301,15 @@ private data class Screen(val route:String):NavKey
 }
 
 @Composable private fun FrameworkStatusCard(store:UiStore){
-    val tint=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f)
+    val light=MiuixTheme.colorScheme.surface.luminance()>.5f
+    val content=if(store.connected){if(light)Color(0xFF173E25) else Color(0xFFF0F8F1)} else MiuixTheme.colorScheme.onSurface
+    val tint=content.copy(alpha=.65f)
     Box(Modifier.fillMaxWidth().heightIn(min=164.dp)
-        .background(if(store.connected)Color(0xFF203D2B) else MiuixTheme.colorScheme.surfaceContainer,RoundedCornerShape(28.dp))){
-        Canvas(Modifier.align(Alignment.CenterEnd).size(128.dp)){val c=if(store.connected)Color(0xFF70D478) else Color.Gray;drawCircle(c,style=androidx.compose.ui.graphics.drawscope.Stroke(9.dp.toPx()));if(store.connected){drawPath(androidx.compose.ui.graphics.Path().apply{moveTo(size.width*.26f,size.height*.51f);lineTo(size.width*.43f,size.height*.67f);lineTo(size.width*.77f,size.height*.33f)},c,style=androidx.compose.ui.graphics.drawscope.Stroke(10.dp.toPx(),cap=androidx.compose.ui.graphics.StrokeCap.Round,join=androidx.compose.ui.graphics.StrokeJoin.Round))}}
+        .background(if(store.connected){if(light)Color(0xFFE0F1E4) else Color(0xFF203D2B)} else MiuixTheme.colorScheme.surfaceContainer,RoundedCornerShape(28.dp))){
+        Canvas(Modifier.align(Alignment.CenterEnd).padding(end=16.dp).size(128.dp)){val c=if(store.connected){if(light)Color(0xFF278844) else Color(0xFF70D478)} else Color.Gray;drawCircle(c,radius=size.minDimension/2-5.dp.toPx(),style=androidx.compose.ui.graphics.drawscope.Stroke(9.dp.toPx()));if(store.connected){drawPath(androidx.compose.ui.graphics.Path().apply{moveTo(size.width*.26f,size.height*.51f);lineTo(size.width*.43f,size.height*.67f);lineTo(size.width*.77f,size.height*.33f)},c,style=androidx.compose.ui.graphics.drawscope.Stroke(10.dp.toPx(),cap=androidx.compose.ui.graphics.StrokeCap.Round,join=androidx.compose.ui.graphics.StrokeJoin.Round))}}
         Column(Modifier.padding(22.dp).padding(end=70.dp),verticalArrangement=Arrangement.spacedBy(10.dp)){
-            Text("MIXI",fontSize=12.sp,modifier=Modifier.background(tint.copy(alpha=.12f),RoundedCornerShape(10.dp)).padding(horizontal=10.dp,vertical=4.dp))
-            Text(if(store.connected)"Đã kết nối" else "Chưa kết nối",fontSize=26.sp)
+            Text("MIXI",fontSize=12.sp,color=content,modifier=Modifier.background(tint.copy(alpha=.12f),RoundedCornerShape(10.dp)).padding(horizontal=10.dp,vertical=4.dp))
+            Text(if(store.connected)"Đã kết nối" else "Chưa kết nối",fontSize=26.sp,color=content)
             Text("Mixi Framework",fontSize=13.sp,color=tint)
         }
     }

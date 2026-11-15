@@ -75,3 +75,15 @@ assert 'getMethod("setPassWindowBlurEnabled"' in preview
 assert "invoke(panel,blur.toInt(),(blur*2f).toInt())" in preview
 assert "invoke(panel,(80f*background/100f).toInt())" in preview
 print("OEM_MATERIAL_INITIALIZATION_SOURCE_CONTRACT_PASS (visual parity pending)")
+
+assert "if(image.tag !== bitmap)" in preview
+assert "val active=enabled&&visible&&foreground" in preview
+assert "panel.tag==configuration" in preview and "panel.tag=configuration" in preview
+assert "lifecycle.removeObserver(observer)" in preview
+main=(manager/"app/src/main/kotlin/com/mixi/manager/MainActivity.kt").read_text(encoding="utf-8")
+assert ".padding(end=16.dp).size(128.dp)" in main
+assert "Color(0xFFE0F1E4)" in main and "color=content" in main
+extension=(out/"SettingsExtension.java").read_text(encoding="utf-8")
+assert 'Method open=null;' not in extension
+assert 'if(!"ALREADY_PLACED".equals(result))' in extension
+print("PREVIEW_LIFECYCLE_IDENTITY_THEME_ENTRY_SOURCE_CONTRACT_PASS (device acceptance pending)")

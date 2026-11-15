@@ -28,7 +28,7 @@ for name,expected in json.loads((manager/'host-integration/framework-inputs.json
     assert sha((root/name).read_bytes())==expected,'Framework source input changed: '+name
 ui=manager/'app/build/outputs/apk/release/app-release.apk'
 badging=subprocess.check_output([str(sdk/'aapt2.exe'),'dump','badging',str(ui)],text=True,encoding='utf-8')
-assert "name='com.mixi.host'" in badging and "versionName='0.9.2-host-ui'" in badging,'Build with -PhostUi=true first'
+assert "name='com.mixi.host'" in badging and "versionName='0.9.3-host-ui'" in badging,'Build with -PhostUi=true first'
 resources=subprocess.check_output([str(sdk/'aapt2.exe'),'dump','resources',str(ui)],text=True,encoding='utf-8')
 assert 'id=80' in resources or 'id=0x80' in resources,'UI resource IDs must be isolated from original 0x7f'
 run(java/'java.exe','-jar',sdk/'lib/apksigner.jar','verify',ui)
@@ -62,7 +62,12 @@ new='''   ensureFragment(host);
    ((Context)call.receiver).startActivity(new android.content.Intent().setComponent(new android.content.ComponentName("com.mixi.host","com.mixi.manager.MainActivity")));
    call.returnValue(null);'''
 assert source.count(old)==1
-generated=out/'SettingsExtension.java';generated.write_text(source.replace(old,new),encoding='utf-8')
+source=source.replace(old,new)
+legacy='  Method open=null;for(Method m:activity.getMethods())if(m.getName().equals("startPreferencePanel")&&m.getParameterTypes().length==6){open=m;break;}\n  if(open==null)throw new NoSuchMethodException("Settings startPreferencePanel");final Method panel=open;'
+assert source.count(legacy)==1
+source=source.replace(legacy,"")
+source=source.replace('SettingsRuntimeEntry.report("HEADER_"+result,"Original Settings header list; size="+list.size());','if(!"ALREADY_PLACED".equals(result))SettingsRuntimeEntry.report("HEADER_"+result,"Original Settings header list; size="+list.size());')
+generated=out/'SettingsExtension.java';generated.write_text(source,encoding='utf-8')
 patch=compile('core-patch',[generated],[root/'build/v06/core-classes.jar',root/'out/v09/v097/core-async-classes',root/'out/v09/reference-r2/core-extra-classes'])
 factory=compile('ui-factory',[manager/'host-integration/HostUiFactory.java'])
 
@@ -89,7 +94,7 @@ metadata['extensionSha256']=sha(settings.read_bytes())
 metadata['buildId']='host-ui-0.9.0-test'
 parts[pin]=''.join(k+'='+v+'\n' for k,v in metadata.items()).encode()
 manifest=(root/'out/v104/AndroidManifest.xml').read_text(encoding='utf-8')
-manifest=manifest.replace('100400','100403').replace('android:versionName="1.0.4"','android:versionName="1.0.4-ui-test"')
+manifest=manifest.replace('100400','100404').replace('android:versionName="1.0.4"','android:versionName="1.0.4-ui-test"')
 manifest=manifest.replace('<application ','<application android:appComponentFactory="mixi.host.ui.HostUiFactory" android:allowBackup="false" ')
 manifest=manifest.replace('</application>','<activity android:name="com.mixi.manager.MainActivity" android:exported="true" android:process=":manager" android:theme="@android:style/Theme.Material.NoActionBar" /></application>')
 (out/'AndroidManifest.xml').write_text(manifest,encoding='utf-8')
