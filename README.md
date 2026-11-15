@@ -1,12 +1,14 @@
 # Mixi Framework Manager
 
-Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA**, pinned to 0.9.4. Android15+ / targetAndroid17. Package `com.mixi.manager`, UI milestone `0.3.0-ui`.
+Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA**, pinned to 0.9.4. Android15+ / targetAndroid17. Package `com.mixi.manager`, UI milestone `0.4.0-ui`.
 
 ## Implemented
 
 - HyperOS-style large titles, grouped cards, Miuix floating blurred navigation and back buttons.
 - Progressive TopAppBar blur from the original Miuix effects, content drawn behind bars, transparent gesture navigation with contrast scrim disabled.
 - Compact honest connection-state card; original Miuix NavDisplay detail navigation animates complete pages, and root tabs use a neighbor-retaining HorizontalPager.
+- Floating-tab motion uses Miuix Folme spring instead of a fixed-duration tween; rapid retargeting still settles at the selected tab.
+- Catalog metadata is generated into Kotlin before build, avoiding JSON asset parsing on startup; page groups are indexed once. Splash/window colors follow the system light/dark theme.
 - Release builds enable R8 and resource shrinking. Use the optimized release preview for performance evaluation; it is signed with the same debug key for easy preview upgrades, not a production security identity.
 - Home ROM/device/Android/kernel facts, feature shortcuts, honest disconnected state.
 - Searchable92-field catalog across10groups: HMC Enhanced subpages, Soft Glass and extensions.
@@ -23,12 +25,13 @@ Use JDK21 and AndroidSDK37/build-tools37.0.0. Configure SDK with Android Studio 
 
 ```
 gradlew.bat :app:assembleRelease :app:lintRelease
+python scripts/generate_catalog.py
 python scripts/verify_catalog.py
 ```
 
 Output: `app/build/outputs/apk/release/app-release.apk`. This is a debug-signed preview, not a production signing configuration. Never commit signing keys or local.properties.
 
-`catalog.json` was exported from Mixi Framework1.0.4 EnhancedCatalog (92controls) using the original Java initializer, preserving keys/defaults/options. The repository verifier checks the shipped data and UI-only app-manifest boundary. `VERIFICATION.json` records build, lint, signature and payload checks. Visual approval on a physical phone is still pending; build/lint do not establish pixel-perfect HyperOS parity.
+`catalog.json` was exported from Mixi Framework1.0.4 EnhancedCatalog (92controls) using the original Java initializer, preserving keys/defaults/options. Run the generator after modifying the source catalog; the verifier checks generated metadata stays in sync. The repository verifier checks the shipped data and UI-only app-manifest boundary. `VERIFICATION.json` records build, lint, signature and payload checks. Visual approval on a physical phone is still pending; build/lint do not establish pixel-perfect HyperOS parity.
 
 ## Credits
 

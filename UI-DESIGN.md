@@ -10,3 +10,6 @@ Use Miuix FloatingNavigationBar textureBlur and progressiveTextureBlur top gradi
 
 ## 0.3 navigation/performance revision
 Original miuix-nav NavDisplay/MiuixDefault animates complete detail pages including appbar/backdrop, with an actual caller stack. Root floating tabs drive HorizontalPager with one neighbor retained; cancellation always settles on the latest selected tab, without skipping on currentPage equality midway. Stable state/immutable catalog metadata enable Compose skipping. Release preview enables R8/resource shrinking with the existing preview signing identity; no runtime services, hook changes or fake framework writes. Physical frame-time acceptance remains pending.
+
+## 0.4 motion/startup revision
+Use original Miuix Folme spring for floating-tab pager: damping .95, response .4seconds, .5px settlement threshold; keep neighbor pages and latest-selection cancellation. Generate immutable catalog metadata during development/build preparation to eliminate startup asset JSON read/parse, retaining the source catalog contract and indexed page lookup. SharedPreferences load remains; no claim that every disk read is removed. Splash window follows system day/night without extra startup Activity. No background preload service, framework writes or hook changes. Physical startup/frame measurements deferred at user request.

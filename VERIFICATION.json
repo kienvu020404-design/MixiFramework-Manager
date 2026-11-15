@@ -1,11 +1,12 @@
 {
-  "version": "0.3.0-ui",
+  "version": "0.4.0-ui",
   "package": "com.mixi.manager",
-  "sha256": "5fe8e12b3aff73de1494ec7682f4a05c7403cb36cb982d130e753500abfd7151",
-  "variant": "R8 optimized/minified/resource-shrunk release, signed with existing preview debug key for upgrade",
-  "checks": "assembleRelease/lintRelease PASS0errors3warnings,signature/manifest/catalog92controls10pages/CRC/noframeworkhookpayload PASS",
-  "changes": "Miuix NavDisplay default detail transition moves complete chrome together; true backstack returns to actual caller; rootHorizontalPager retains neighbor tabs and alwayssettleslatestselection after rapidtaps; ComposeStable UiStore/Immutable Option; no app-backgroundwork",
-  "apk_bytes": 2785504,
-  "framework_scope": "UIpreviewonly,framework/HMC unchanged",
-  "visual_perf": "devicevisualandframetime not yet measured,do not claim no jank from build"
+  "sha256": "8d8f9993691b7480be32bb1cc8ef4338362c6f883d383f8568d1a01c159e6383",
+  "variant": "R8 optimized release, same preview debug signing for upgrades",
+  "checks": "assembleRelease/lintRelease0errors3warnings/signature/package/ZIPCRC/catalog92contract+compiledmetadataequivalence PASS",
+  "changes": "Miuix folmeSpring(.95 damping,.4response,.5px threshold) replaces fixed-time tab motion; generated Kotlin catalog removes startup assetJSON IO/parse; byPagecache replaces repeated scans; splashwindow light/night and theme icon consistency",
+  "apk_bytes": 2802344,
+  "scope": "UI/localpreview only; no framework/HMC/hooks/background preload service changes",
+  "startup_limits": "SharedPreferencesinitialread retained; do not claim mainthreadallIOremoved or fastestpossible without traces",
+  "device": "user deferred ADBtest; cold/warmstart andframepacing not measured; smoothermotion pendingvisualacceptance"
 }

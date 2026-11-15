@@ -10,7 +10,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowCompat
-import androidx.compose.animation.core.tween
+import top.yukonga.miuix.kmp.anim.folmeSpring
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.background
@@ -32,7 +32,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.json.JSONArray
 import top.yukonga.miuix.kmp.basic.*
 import top.yukonga.miuix.kmp.preference.*
 import top.yukonga.miuix.kmp.theme.*
@@ -52,12 +51,8 @@ class UiStore(context:Context) {
     val values=mutableStateMapOf<String,String>().apply {
         preferences.all.forEach { (key,value)->if(value is String)put(key,value) }
     }
-    val catalog:List<Option> = JSONArray(context.assets.open("catalog.json").bufferedReader().use { it.readText() }).let { array ->
-        List(array.length()) { index -> array.getJSONObject(index).let { o ->
-            fun strings(key:String)=o.getJSONArray(key).let { a->List(a.length()){a.getString(it)} }
-            Option(o.getString("page"),o.getString("key"),o.getString("title"),o.getString("kind"),o.getString("initial"),o.getInt("min"),o.getInt("max"),o.getString("unit"),strings("labels"),strings("values"),o.getBoolean("secret"))
-        } }
-    }
+    val catalog:List<Option> = UiCatalog.options
+    val byPage:Map<String,List<Option>> = catalog.groupBy{it.page}
     fun value(option:Option)=values[option.key]?:option.initial
     fun set(key:String,value:String){values[key]=value;preferences.edit().putString(key,value).apply()}
 }
@@ -92,7 +87,7 @@ private data class Screen(val route:String):NavKey
 @Composable private fun Manager(store:UiStore,context:Context){
     var tab by rememberSaveable{mutableIntStateOf(0)}
     val rootPager=rememberPagerState(initialPage=tab,pageCount={3})
-    LaunchedEffect(tab){rootPager.animateScrollToPage(tab,animationSpec=tween(240))}
+    LaunchedEffect(tab){rootPager.animateScrollToPage(tab,animationSpec=folmeSpring(damping=.95f,response=.4f,visibilityThreshold=.5f))}
     val stack=remember{navBackStackOf(Screen("root"))}
     fun open(route:String){if((stack.lastOrNull() as? Screen)?.route!=route)stack.add(Screen(route))}
     fun back(){if(stack.size>1)stack.removeAt(stack.lastIndex)}
@@ -183,7 +178,7 @@ private data class Screen(val route:String):NavKey
                         Card {SwitchPreference(title="HyperMusicCover Enhanced",summary="Lựa chọn xem trước trên Manager",checked=store.values["preview.hmc"]!="false",onCheckedChange={store.set("preview.hmc",it.toString())})}
                         Group("Cá nhân hóa"){
                             pages.filterKeys{it !in listOf("appearance","extensions")}.forEach{(page,name)->
-                                ArrowPreference(title=name,summary="${store.catalog.count{it.page==page}} tùy chỉnh",onClick={open(page)})
+                                ArrowPreference(title=name,summary="${store.byPage[page].orEmpty().size} tùy chỉnh",onClick={open(page)})
                             }
                         }
                     }
@@ -196,7 +191,7 @@ private data class Screen(val route:String):NavKey
                     }
                     else->{
                         PreviewNote()
-                        val controls=store.catalog.filter{it.page==route}
+                        val controls=store.byPage[route].orEmpty()
                         controls.groupBy { option ->
                             when(route){
                                 "appearance" -> when(option.key){"appearance.enabled"->"Soft Glass";"appearance.blur","appearance.background"->"Độ mờ";else->"Vật liệu"}
