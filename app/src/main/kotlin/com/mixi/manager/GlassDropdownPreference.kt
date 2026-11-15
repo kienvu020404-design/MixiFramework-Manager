@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Column
@@ -45,7 +47,7 @@ internal val LocalMenuBackdrop=staticCompositionLocalOf<LayerBackdrop?>{null}
 
 @Composable internal fun GlassChoicePopup(
     items:List<String>,selectedIndex:Int,show:Boolean,onDismiss:()->Unit,
-    anchor:androidx.compose.ui.unit.IntRect?=null,minimumWidth:androidx.compose.ui.unit.Dp=220.dp,onSelect:(Int)->Unit,
+    anchor:androidx.compose.ui.unit.IntRect?=null,minimumWidth:androidx.compose.ui.unit.Dp=200.dp,onSelect:(Int)->Unit,
 ){
     val haptics=LocalHapticFeedback.current
     val backdrop=LocalMenuBackdrop.current
@@ -62,11 +64,11 @@ internal val LocalMenuBackdrop=staticCompositionLocalOf<LayerBackdrop?>{null}
         }
     }
             OverlayListPopup(show=show,popupPositionProvider=position,alignment=PopupPositionProvider.Align.End,enableWindowDim=false,
-                onDismissRequest=onDismiss){
+                onDismissRequest=onDismiss,minWidth=minimumWidth){
                 val material=if(backdrop!=null)Modifier.textureBlur(backdrop=backdrop,shape=shape,blurRadius=25f,noiseCoefficient=0f,
                     colors=BlurDefaults.blurColors(blendColors=listOf(BlendColorEntry(color=scheme.surfaceContainer.copy(alpha=.72f)))))
                     else Modifier.background(scheme.surfaceContainer,shape)
-                Box(Modifier.widthIn(min=minimumWidth,max=288.dp).clip(shape).then(material)
+                Box(Modifier.widthIn(min=minimumWidth,max=240.dp).width(IntrinsicSize.Max).clip(shape).then(material)
                     .border(.5.dp,Brush.linearGradient(listOf(scheme.onSurface.copy(alpha=.14f),Color.Transparent,scheme.onSurface.copy(alpha=.06f))),shape)){
                     Column(Modifier.fillMaxWidth().padding(8.dp).verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(2.dp)){
                         items.forEachIndexed{index,label->

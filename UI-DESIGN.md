@@ -37,3 +37,6 @@ HyperImmersive matches the provided layout: runtime header (unknown until connec
 
 ## 0.8.1 unit menu anchor/material
 Factor one shared GlassChoicePopup from the existing dropdown helper. The HyperImmersive unit button records boundsInWindow; only this anchor is passed to Miuix default position provider, avoiding inference from the whole preference row. Reuse existing blur/tick/roundedgeometry/no-dim style and compact180dp minimum width. Standard choice anchors remain unchanged. Actual phone placement after IME/scroll needs visual approval.
+
+## 0.8.2 compact popup width
+User requests less empty horizontal menu space. Measure the shared surface using IntrinsicSize.Max inside a200–240dp default width range instead of expanding the list to288dp. Pass the same minimum to the original OverlayListPopup measurement; unit menus retain180dp minimum. Text wraps if needed, rowheight/accessible radio/tick behavior and8dpedgeinsets remain. Keep blur and no dim. Physical narrow/longlabel approval pending.

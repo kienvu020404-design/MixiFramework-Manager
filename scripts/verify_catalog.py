@@ -45,3 +45,7 @@ for filename,expected in {
 }.items():
  assert hashlib.sha256((root/'app/src/main/res/raw'/filename).read_bytes()).hexdigest()==expected
 print('ORIGINAL_ENHANCED_ISLAND_ASSETS_PASS')
+
+assert 'max=240.dp).width(IntrinsicSize.Max)' in popup
+assert 'minWidth=minimumWidth' in popup
+print('COMPACT_POPUP_CONTENT_WIDTH_PASS')
