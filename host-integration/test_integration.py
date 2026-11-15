@@ -69,3 +69,9 @@ print('HOST_UI_LOCAL_CHECKS_PASS')
 
 assert factory.index("if (!target.isFile()") < factory.index('getEntry("assets/mixi-ui/module.apk")')
 print("CACHE_HIT_SKIPS_EMBEDDED_MODULE_READ_SOURCE_PASS")
+
+assert 'getMethod("setMiViewMaterialType"' in preview
+assert 'getMethod("setPassWindowBlurEnabled"' in preview
+assert "invoke(panel,blur.toInt(),(blur*2f).toInt())" in preview
+assert "invoke(panel,(80f*background/100f).toInt())" in preview
+print("OEM_MATERIAL_INITIALIZATION_SOURCE_CONTRACT_PASS (visual parity pending)")

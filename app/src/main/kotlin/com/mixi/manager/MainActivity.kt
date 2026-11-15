@@ -301,7 +301,7 @@ private data class Screen(val route:String):NavKey
 
 @Composable private fun FrameworkStatusCard(store:UiStore){
     val tint=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f)
-    Box(Modifier.fillMaxWidth().padding(horizontal=8.dp).heightIn(min=156.dp)
+    Box(Modifier.fillMaxWidth().heightIn(min=164.dp)
         .background(if(store.connected)Color(0xFF203D2B) else MiuixTheme.colorScheme.surfaceContainer,RoundedCornerShape(28.dp))){
         Canvas(Modifier.align(Alignment.CenterEnd).size(128.dp)){val c=if(store.connected)Color(0xFF70D478) else Color.Gray;drawCircle(c,style=androidx.compose.ui.graphics.drawscope.Stroke(9.dp.toPx()));if(store.connected){drawPath(androidx.compose.ui.graphics.Path().apply{moveTo(size.width*.26f,size.height*.51f);lineTo(size.width*.43f,size.height*.67f);lineTo(size.width*.77f,size.height*.33f)},c,style=androidx.compose.ui.graphics.drawscope.Stroke(10.dp.toPx(),cap=androidx.compose.ui.graphics.StrokeCap.Round,join=androidx.compose.ui.graphics.StrokeJoin.Round))}}
         Column(Modifier.padding(22.dp).padding(end=70.dp),verticalArrangement=Arrangement.spacedBy(10.dp)){

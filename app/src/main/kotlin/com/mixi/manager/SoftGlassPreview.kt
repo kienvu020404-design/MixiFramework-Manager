@@ -72,11 +72,15 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
             val panel=frame.getChildAt(1)
             try{
                 val native=recipe.clone();native[14]=opacity/100f;native[24]=reflection/100f
-                android.view.View::class.java.getMethod("setMiBackgroundBlurMode",Int::class.javaPrimitiveType).invoke(panel,if(enabled)1 else 0)
+                android.view.View::class.java.getMethod("clearMiBackgroundBlendColor").invoke(panel)
+                android.view.View::class.java.getMethod("setPassWindowBlurEnabled",Boolean::class.javaPrimitiveType).invoke(panel,enabled)
                 android.view.View::class.java.getMethod("setMiViewBlurMode",Int::class.javaPrimitiveType).invoke(panel,if(enabled)1 else 0)
+                android.view.View::class.java.getMethod("setMiBackgroundBlurMode",Int::class.javaPrimitiveType).invoke(panel,if(enabled)1 else 0)
+                android.view.View::class.java.getMethod("setMiBackgroundBlurRadius",Int::class.javaPrimitiveType).invoke(panel,(80f*background/100f).toInt())
+                if(enabled)android.view.View::class.java.getMethod("addMiBackgroundBlendColor",Int::class.javaPrimitiveType,Int::class.javaPrimitiveType).invoke(panel,0x1AFFFFFF,101)
+                android.view.View::class.java.getMethod("setMiGlassBlurRadius",Int::class.javaPrimitiveType,Int::class.javaPrimitiveType).invoke(panel,blur.toInt(),(blur*2f).toInt())
+                android.view.View::class.java.getMethod("setMiViewMaterialType",Int::class.javaPrimitiveType).invoke(panel,if(enabled)1 else 0)
                 android.view.View::class.java.getMethod("setMiGlass",FloatArray::class.java).invoke(panel,if(enabled)native else null)
-                android.view.View::class.java.getMethod("setMiGlassBlurRadius",Int::class.javaPrimitiveType,Int::class.javaPrimitiveType).invoke(panel,blur.toInt(),blur.toInt())
-                android.view.View::class.java.getMethod("setMiBackgroundBlurRadius",Int::class.javaPrimitiveType).invoke(panel,(blur*background/100f).toInt())
                 failed=false
             }catch(_:ReflectiveOperationException){failed=true}
         })
