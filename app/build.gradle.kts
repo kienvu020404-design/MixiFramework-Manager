@@ -3,7 +3,7 @@ android {
  namespace = "com.mixi.manager"
  compileSdk { version = release(37) }
  buildToolsVersion = "37.0.0"
- defaultConfig { applicationId = "com.mixi.manager"; minSdk = 35; targetSdk = 37; versionCode = 1; versionName = "0.1.0-ui" }
+ defaultConfig { applicationId = "com.mixi.manager"; minSdk = 35; targetSdk = 37; versionCode = 2; versionName = "0.2.0-ui" }
  buildFeatures { compose = true; buildConfig = true }
  compileOptions { sourceCompatibility = JavaVersion.VERSION_21; targetCompatibility = JavaVersion.VERSION_21 }
 }
@@ -13,6 +13,7 @@ dependencies {
  implementation("top.yukonga.miuix.kmp:miuix-ui-android:0.9.4")
  implementation("top.yukonga.miuix.kmp:miuix-preference-android:0.9.4")
  implementation("top.yukonga.miuix.kmp:miuix-icons-android:0.9.4")
+ implementation("top.yukonga.miuix.kmp:miuix-blur-android:0.9.4")
  constraints {
   implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.11.0")
   implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.11.0")

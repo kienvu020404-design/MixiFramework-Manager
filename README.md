@@ -1,10 +1,12 @@
 # Mixi Framework Manager
 
-Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA**, pinned to 0.9.4. Android15+ / targetAndroid17. Package `com.mixi.manager`, UI milestone `0.1.0-ui`.
+Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA**, pinned to 0.9.4. Android15+ / targetAndroid17. Package `com.mixi.manager`, UI milestone `0.2.0-ui`.
 
 ## Implemented
 
-- HyperOS-style large titles, grouped cards, Miuix bottom navigation and back buttons.
+- HyperOS-style large titles, grouped cards, Miuix floating blurred navigation and back buttons.
+- Progressive TopAppBar blur from the original Miuix effects, content drawn behind bars, transparent gesture navigation with contrast scrim disabled.
+- Compact framework status card (unknown/disconnected until integration) and fixed-size slide/fade page transitions without resizing the whole page.
 - Home ROM/device/Android/kernel facts, feature shortcuts, honest disconnected state.
 - Searchable92-field catalog across10groups: HMC Enhanced subpages, Soft Glass and extensions.
 - Original Miuix switches, overlay dropdowns and sliders with live numbers; slider previews persist on release.

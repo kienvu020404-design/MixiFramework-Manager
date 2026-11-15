@@ -9,7 +9,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.AnimatedContent
+import androidx.core.view.WindowCompat
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import top.yukonga.miuix.kmp.blur.*
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -57,10 +68,17 @@ private val pages=linkedMapOf(
 class MainActivity:ComponentActivity(){
     override fun onCreate(savedInstanceState:Bundle?){
         super.onCreate(savedInstanceState);enableEdgeToEdge()
+        window.isNavigationBarContrastEnforced=false
         val store=UiStore(applicationContext)
         setContent {
             val appearance=store.values["manager.theme"]?:"0"
             val dark=when(appearance){"1"->false;"2"->true;else->isSystemInDarkTheme()}
+            SideEffect {
+                WindowCompat.getInsetsController(window,window.decorView).apply {
+                    isAppearanceLightStatusBars=!dark
+                    isAppearanceLightNavigationBars=!dark
+                }
+            }
             MiuixTheme(colors=if(dark)darkColorScheme() else lightColorScheme()){Manager(store,this)}
         }
     }
@@ -73,22 +91,47 @@ class MainActivity:ComponentActivity(){
     fun back(){detail=if(detail in pages && detail !in listOf("appearance","extensions"))"hmc" else ""}
     BackHandler(detail.isNotEmpty()||tab!=0){if(detail.isNotEmpty())back() else tab=0}
     val title=if(detail.isEmpty())listOf("Mixi Framework","Tính năng","Thông tin")[tab] else if(detail=="hmc")"HyperMusicCover Enhanced" else pages[detail]?:"Mã nguồn & Ghi nhận"
-    Scaffold(topBar={TopAppBar(title=title,navigationIcon={if(detail.isNotEmpty())IconButton(onClick={back()},modifier=Modifier.size(48.dp)){Icon(MiuixIcons.Back,contentDescription="Quay lại")}})},
-        bottomBar={if(detail.isEmpty())NavigationBar{
-            NavigationBarItem(tab==0,{tab=0},MiuixIcons.Home,"Trang chủ")
-            NavigationBarItem(tab==1,{tab=1},MiuixIcons.Settings,"Tính năng")
-            NavigationBarItem(tab==2,{tab=2},MiuixIcons.Info,"Thông tin")
-        }}){padding->
-        AnimatedContent(targetState=detail.ifEmpty{"tab$tab"},label="page"){route->
-            pageStates.SaveableStateProvider(route){Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal=16.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){
+    val surface=MiuixTheme.colorScheme.surface
+    val backdrop=rememberLayerBackdrop{drawRect(surface);drawContent()}
+    val scrollBehavior=key(detail,tab){MiuixScrollBehavior()}
+    val barColors=BlurDefaults.blurColors(blendColors=listOf(BlendColorEntry(color=surface.copy(alpha=.38f))))
+    Scaffold(topBar={
+        Box {
+            Box(Modifier.matchParentSize().graphicsLayer{
+                alpha=(-scrollBehavior.state.contentOffset/48.dp.toPx()).coerceIn(0f,1f)
+            }.progressiveTextureBlur(backdrop=backdrop,shape=RectangleShape,gradient=ProgressiveBlur.Top.copy(curve=2.2f),blurRadius=10f,colors=barColors))
+            TopAppBar(title=title,color=Color.Transparent,scrollBehavior=scrollBehavior,navigationIcon={
+                if(detail.isNotEmpty())IconButton(onClick={back()},modifier=Modifier.size(48.dp)){Icon(MiuixIcons.Back,contentDescription="Quay lại")}
+            })
+        }
+    },bottomBar={if(detail.isEmpty()){
+        FloatingNavigationBar(
+            color=Color.Transparent,
+            modifier=Modifier.textureBlur(backdrop=backdrop,shape=RoundedCornerShape(32.dp),blurRadius=25f,
+                colors=BlurDefaults.blurColors(blendColors=listOf(BlendColorEntry(color=MiuixTheme.colorScheme.surfaceContainer.copy(alpha=.65f)))))){
+            FloatingNavigationBarItem(tab==0,{tab=0},MiuixIcons.Home,"Trang chủ")
+            FloatingNavigationBarItem(tab==1,{tab=1},MiuixIcons.Settings,"Tính năng")
+            FloatingNavigationBarItem(tab==2,{tab=2},MiuixIcons.Info,"Thông tin")
+        }
+    }}){padding->
+        Box(Modifier.fillMaxSize().layerBackdrop(backdrop)){
+        val pageKey=detail.ifEmpty{"tab$tab"}
+        AnimatedContent(targetState=pageKey,modifier=Modifier.fillMaxSize(),label="page",transitionSpec={
+            val forward=targetState !in listOf("tab0","tab1","tab2","hmc") || initialState.startsWith("tab") && !targetState.startsWith("tab")
+            val direction=if(forward)1 else -1
+            if(initialState.startsWith("tab")&&targetState.startsWith("tab")){
+                (fadeIn(tween(150)) togetherWith fadeOut(tween(100))).using(null)
+            }else{
+                ((slideInHorizontally(tween(280,easing=FastOutSlowInEasing)){it*direction/5}+fadeIn(tween(180))) togetherWith
+                    (slideOutHorizontally(tween(280,easing=FastOutSlowInEasing)){-it*direction/10}+fadeOut(tween(120)))).using(null)
+            }
+        }){route->
+            pageStates.SaveableStateProvider(route){Column(Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection)
+                .verticalScroll(rememberScrollState()).padding(top=padding.calculateTopPadding(),bottom=padding.calculateBottomPadding())
+                .padding(horizontal=16.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){
                 when(route){
                     "tab0"->{
-                        Card {Column(Modifier.padding(22.dp),verticalArrangement=Arrangement.spacedBy(8.dp)){
-                            Text("MIXI",fontSize=14.sp,color=MiuixTheme.colorScheme.primary)
-                            Text("Mọi tùy chỉnh,\nmột nơi duy nhất.",fontSize=28.sp)
-                            Text("Manager ${BuildConfig.VERSION_NAME}",color=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f))
-                        }}
-                        PreviewNote()
+                        FrameworkStatusCard()
                         Group("Tính năng"){
                             ArrowPreference(title="HyperMusicCover Enhanced",summary="Ảnh bìa, lời bài hát và Lockscreen Island",onClick={detail="hmc"})
                             ArrowPreference(title="Tùy chỉnh Soft Glass",summary="Độ mờ, độ trong và phản chiếu",onClick={detail="appearance"})
@@ -167,7 +210,22 @@ class MainActivity:ComponentActivity(){
                 Spacer(Modifier.height(24.dp))
             }}
         }
+        }
     }
+}
+
+@Composable private fun FrameworkStatusCard(){
+    val tint=MiuixTheme.colorScheme.onSurface.copy(alpha=.55f)
+    Box(Modifier.fillMaxWidth().padding(horizontal=8.dp).heightIn(min=156.dp)
+        .background(MiuixTheme.colorScheme.surfaceContainer,RoundedCornerShape(28.dp))){
+        Icon(MiuixIcons.Info,contentDescription=null,tint=tint.copy(alpha=.12f),modifier=Modifier.align(Alignment.CenterEnd).padding(end=16.dp).size(112.dp))
+        Column(Modifier.padding(22.dp).padding(end=70.dp),verticalArrangement=Arrangement.spacedBy(10.dp)){
+            Text("MIXI",fontSize=12.sp,modifier=Modifier.background(tint.copy(alpha=.12f),RoundedCornerShape(10.dp)).padding(horizontal=10.dp,vertical=4.dp))
+            Text("Chưa kết nối",fontSize=26.sp)
+            Text("Framework · Chưa xác nhận",fontSize=13.sp,color=tint)
+        }
+    }
+    Text("Bản giao diện · Các lựa chọn chưa áp dụng lên hệ thống",fontSize=12.sp,color=tint,modifier=Modifier.padding(horizontal=12.dp))
 }
 
 @Composable private fun PreviewNote(){Card{BasicComponent(title="Chưa kết nối framework",summary="Các lựa chọn hiện chỉ lưu trong Manager, chưa áp dụng lên hệ thống.")}}

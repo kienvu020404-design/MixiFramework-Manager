@@ -1,12 +1,9 @@
 {
-  "version": "0.1.0-ui",
+  "version": "0.2.0-ui",
   "package": "com.mixi.manager",
-  "sha256": "ff5ca33e13cf46ecc907c7ccaf6d9d5d731dac85d5e9391ade51b1846ec02ecf",
-  "build": "assembleDebug PASS",
-  "lint": "0 errors,3 warnings (legacy image silhouette,2 KTX style suggestions)",
-  "catalog": "92 unique fields,10 groups/defaults/enums/ranges validated",
-  "signature": "apksigner v2 verifies",
-  "scope": "UI/local preview only; no root/framework binder/configuration writes,hook/native runtime or background service",
-  "source": "Miuix0.9.4 pinned; original Mixi icon reused without image changes",
-  "visual_acceptance": "not yet installed or inspected on phone; user manual UI review pending"
+  "sha256": "f2dd74d5aabf8172555f42995f7b034f23a857d6aaf7fa4cbf11e3964d47e2b9",
+  "checks": "assembleDebug/lintDebug PASS0errors3warnings;apksignaturePASS;catalog92fields10pagesPASS;ZIPCRC/nohookengine/nativeframeworkpayloadPASS",
+  "changes": "originalMiuix FloatingNavigationBar+textureblur;progressiveTextureBlur Top gradientcurve2.2;sharedcontentbackdrop;transparentedge-to-edge+navigationcontrastoff;fixedsize slides/fadeswithoutAnimatedContentSizeTransform;compacthonestframeworkstatuscard",
+  "runtime_scope": "UI/localpreviewonly;noframework/HMCchanges;noActiveclaimwithoutconnection",
+  "visual_perf": "userdevicevisualandframeacceptancepending;no claim jank eliminated from compile/lint"
 }
