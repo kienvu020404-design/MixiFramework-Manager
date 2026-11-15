@@ -1,19 +1,47 @@
 {
-  "hostSha256": "9c4d32e3e0312e8a7c5c44d23bee089a9ab8808b41ae4090a6e029701165a222",
+  "hostSha256": "21fae52ab979bce206cd89ae8799203d90c1f45d69c8c5e923d8a90d3a8ca3aa",
   "uiSha256": "acb5acee951d11eb81f11374e2e207ae26f6419a679af87d03672157eb8deea9",
   "baselineSha256": "fc2f2f5701dfa41e95a95ab182d13aece279331e5f52d6082982b5055187e8bc",
   "checks": "signature identity, CRC, UI resource package 0x80, original API/HMC DEX/resources/assets/libs exact, non-SettingsExtension core classes preserved",
-  "device": "0.9.4 manual installation/background/lifecycle and battery visual acceptance pending; no auto install/restart",
+  "device": "Baseline actual states COLD5 median224ms; HOT10 median34ms; no WARM samples. Candidate copied and hash checked on phone; manual install and after benchmark pending",
   "scope": "Settings navigation/config relay + lazy isolated Host UI; no runtime native/HMC changes",
   "localTests": "92 catalog defaults/invalid values; source-extracted acknowledgement race; auth/deadline/extraction source contracts; nested APK CRC PASS",
-  "artifact": "Mixi-v1.0.4-HostUI-0.9.4-Test.zip",
-  "moduleSha256": "62596bf643188fda2c1170c4d22f6851e3da527fd78cd75b0eccd7f83de8a299",
+  "artifact": "Mixi-v1.0.4-SettingsOpt-Test.zip",
+  "moduleSha256": "ae3f2877a92f332142e483e9b94bf605545f3b1e192442f9daba4dfb9aec1ccb",
   "moduleChecks": "CRC/SHA256SUMS/unchanged installer/unchanged external native+API JAR PASS",
   "noAutomaticInstall": true,
-  "version": "0.9.4-host-ui",
-  "change": "Remove project link and unused status/probe state/imports; explicit-page-only Immersive status; lifecycle-scoped read cancellation; stop offscreen Island animation; Extensions Apply saves battery settings then existing SystemUI reload",
-  "review": "Scoped independent review: fixed stale Immersive page on resume with repeatOnLifecycle; no further blocker reported. No Manager wake lock/service/polling found; keep errors/auth/deadline/config validation.",
-  "applyTest": "Source-extracted production Apply method with fake Android transport: drain ordering/latest values, provider failure stops reload, expired action stops writes/reload PASS. Not an on-phone reload test.",
-  "preserved": "HMC/API/native/resource bytes and cache-hit optimization unchanged",
-  "build": "Release/lint PASS; warnings=4"
+  "stage": "Settings optimization only before deferred Manager1.0.0/Framework1.0.5 display work",
+  "change": "Verified-firmware-only owned-row before-hook skips OEM placeholder resource/bitmap work; cached scaled icon/visibility preserved; other rows and other firmware use OEM path",
+  "review": "Independent review plus extracted callback test PASS; no config/schema/native/HMC changes",
+  "beforeBenchmark": {
+    "COLD": {
+      "samples": [
+        216,
+        226,
+        223,
+        231,
+        224
+      ],
+      "medianMs": 224
+    },
+    "WARM": {
+      "samples": [],
+      "medianMs": null
+    },
+    "HOT": {
+      "samples": [
+        35,
+        38,
+        44,
+        34,
+        34,
+        47,
+        32,
+        31,
+        33,
+        33
+      ],
+      "medianMs": 34.0
+    }
+  }
 }

@@ -67,6 +67,12 @@ legacy='  Method open=null;for(Method m:activity.getMethods())if(m.getName().equ
 assert source.count(legacy)==1
 source=source.replace(legacy,"")
 source=source.replace('SettingsRuntimeEntry.report("HEADER_"+result,"Original Settings header list; size="+list.size());','if(!"ALREADY_PLACED".equals(result))SettingsRuntimeEntry.report("HEADER_"+result,"Original Settings header list; size="+list.size());')
+# Exact stock setIcon body was inspected on HyperOS4.0.4: only our row skips
+# the placeholder resource load/bitmap conversion which we used to overwrite.
+icon_old='  Method setIcon=adapter.getDeclaredMethod("setIcon",holder,header);\n  runtime.hooks.add(setIcon,"mixi-header-icon",100,new HookRegistry.Callback(){public void after(HookRegistry.Call call)throws Exception{\n   Object own=call.arguments()[1];\n   if(call.failure()!=null||own==null||!HeaderPlacement.FRAGMENT.equals(headerFragment.get(own)))return;\n   android.widget.ImageView image=(android.widget.ImageView)readField(call.arguments()[0],"icon");\n   image.setImageBitmap(headerIcon);image.setVisibility(android.view.View.VISIBLE);\n  }});'
+icon_new='  Method setIcon=adapter.getDeclaredMethod("setIcon",holder,header);\n  final Field holderIcon=holder.getDeclaredField("icon");holderIcon.setAccessible(true);\n  runtime.hooks.add(setIcon,"mixi-header-icon",100,new HookRegistry.Callback(){public void before(HookRegistry.Call call)throws Exception{\n   Object own=call.arguments()[1];\n   if(own==null||!HeaderPlacement.FRAGMENT.equals(headerFragment.get(own)))return;\n   Object row=call.arguments()[0];\n   if(row==null)return;\n   android.widget.ImageView image=(android.widget.ImageView)holderIcon.get(row);\n   if(image!=null){image.setImageBitmap(headerIcon);image.setVisibility(android.view.View.VISIBLE);}\n   call.returnValue(null);\n  }});'
+assert source.count(icon_old)==1
+source=source.replace(icon_old,'  if("OS4.0.4.0.XOBCNXM".equals(android.os.Build.VERSION.INCREMENTAL)){\n'+icon_new+'\n  }else{\n'+icon_old+'\n  }')
 generated=out/'SettingsExtension.java';generated.write_text(source,encoding='utf-8')
 patch=compile('core-patch',[generated],[root/'build/v06/core-classes.jar',root/'out/v09/v097/core-async-classes',root/'out/v09/reference-r2/core-extra-classes'])
 factory=compile('ui-factory',[manager/'host-integration/HostUiFactory.java'])
@@ -94,7 +100,7 @@ metadata['extensionSha256']=sha(settings.read_bytes())
 metadata['buildId']='host-ui-0.9.4-test'
 parts[pin]=''.join(k+'='+v+'\n' for k,v in metadata.items()).encode()
 manifest=(root/'out/v104/AndroidManifest.xml').read_text(encoding='utf-8')
-manifest=manifest.replace('100400','100405').replace('android:versionName="1.0.4"','android:versionName="1.0.4-ui-test"')
+manifest=manifest.replace('100400','100406').replace('android:versionName="1.0.4"','android:versionName="1.0.4-ui-test"')
 manifest=manifest.replace('<application ','<application android:appComponentFactory="mixi.host.ui.HostUiFactory" android:allowBackup="false" ')
 manifest=manifest.replace('</application>','<activity android:name="com.mixi.manager.MainActivity" android:exported="true" android:process=":manager" android:theme="@android:style/Theme.Material.NoActionBar" /></application>')
 (out/'AndroidManifest.xml').write_text(manifest,encoding='utf-8')
