@@ -37,5 +37,51 @@
     98,
     86
   ],
-  "after093": "PENDING manual test installation; no claimed performance gain"
+  "after093": {
+    "version": "0.9.3-host-ui",
+    "verifiedHostHash": "6cd00c1afefb6a2cc94f3d722a0aebcd5f7f71fa67cbf53b617c58a328101cd1",
+    "manager": {
+      "coldMs": 211,
+      "hotMs": [
+        29,
+        28
+      ]
+    },
+    "settings": {
+      "coldMs": 257,
+      "hotMs": [
+        44,
+        29,
+        27
+      ]
+    },
+    "homeScroll": {
+      "frames": 850,
+      "jank": 1,
+      "p95Ms": 10,
+      "gpuP95Ms": 7,
+      "legacyJank": 16
+    },
+    "limits": "Single-run samples; no controlled thermal/refresh-rate matching. UNKNOWN0ms discarded. No comparable prior cold Settings baseline. Home/dense not improved; Glass GPU sample improved, no global speedup claim.",
+    "denseScroll": {
+      "frames": 772,
+      "jank": 2,
+      "p95Ms": 8,
+      "gpuP95Ms": 4,
+      "legacyJank": 10
+    },
+    "glassScroll": {
+      "frames": 908,
+      "jank": 1,
+      "legacyJank": 32,
+      "p95Ms": 10,
+      "gpuP95Ms": 5
+    },
+    "background": {
+      "seconds": 30.03000000000003,
+      "deltaCpuTicks": 3,
+      "cpuPercentOneCore": 0.0999000999000998,
+      "mixiHeldWakeLockInSnapshot": false
+    }
+  }
 }
