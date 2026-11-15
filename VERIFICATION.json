@@ -1,9 +1,9 @@
 {
-  "version": "0.6.1-ui",
+  "version": "0.7.0-ui",
   "package": "com.mixi.manager",
-  "sha256": "55c893e02e6210d9840a4a0efeb58e262420685d097af5e5ebcdb6dbe2929fe6",
-  "checks": "assembleRelease/signature/manifest/ZIPCRC/source layout order PASS",
-  "change": "master switch -> sample -> blur controls -> material controls; preview and persistence logic unchanged",
-  "scope": "UIonly,noframework/HMCchange",
-  "device_visual": "pending physical review; approximate preview unchanged,not OEM renderer"
+  "sha256": "f9b0fb2f061ac9014739508fa9e29802d1ca029f94d932f42fd0440377a5d48a",
+  "checks": "assembleRelease/lintRelease0errors3warnings/signature/manifest/ZIPCRC/catalog92compiledcontract PASS",
+  "changes": "one shared GlassDropdownPreference for allchoices+theme; originalOverlayListPopup(enableWindowDimfalse) and DropdownImpl for motion/anchor/selection/accessibility/haptics;28dproundedblur25f/thinhighlightborder;adaptiveheight",
+  "scope": "only popuphost surface cleared totransparent; app/page colors staynormal; popup capturespagebackdrop; no systemglass hook orframework/HMC change",
+  "device_visual": "not installed/inspected on phone; pixel/corner/blur/dim anddismissvisualacceptancepending"
 }

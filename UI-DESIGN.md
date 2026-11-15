@@ -22,3 +22,6 @@ User explicitly requests layout/preview UI first, exact system appearance later.
 
 ## 0.6.1 preview placement correction
 User requires the sample immediately below the Soft Glass master switch. Final order: explanation, master switch, sample, blur controls, material controls. Only layout order changes; preview mappings and local persistence remain unchanged.
+
+## 0.7 undimmed dropdown glass
+User reference: anchored dropdown with translucent blurred material and soft rounded corners, no dark veil over the page. All choice controls and theme selector use one shared helper. Reuse original Miuix OverlayListPopup (enableWindowDim=false), ListPopupColumn measurement/scroll, DropdownImpl check/radio semantics, native haptics and animation. The popup host alone clears its default opaque surface; page/root theme stays unchanged. Blur samples the page LayerBackdrop, 28dp clip plus thin highlight border, adaptive popup height. Flat surface fallback when no backdrop exists. Not a SystemUI Glass hook or exact OEM material parity claim. Physical appearance/accessibility interaction still pending on phone.

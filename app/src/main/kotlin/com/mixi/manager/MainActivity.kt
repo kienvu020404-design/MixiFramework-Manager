@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import top.yukonga.miuix.kmp.blur.*
 import top.yukonga.miuix.kmp.nav.core.*
+import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.MiuixPopupHost
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -101,7 +102,9 @@ private data class Screen(val route:String):NavKey
     val backdrop=rememberLayerBackdrop{drawRect(surface);drawContent()}
     val scrollBehavior=key(screen,tab){MiuixScrollBehavior()}
     val barColors=BlurDefaults.blurColors(blendColors=listOf(BlendColorEntry(color=surface.copy(alpha=.38f))))
-    Scaffold(topBar={
+    Scaffold(popupHost={
+        MiuixTheme(colors=MiuixTheme.colorScheme.copy(surfaceContainer=Color.Transparent)){MiuixPopupHost()}
+    },topBar={
         Box {
             Box(Modifier.matchParentSize().graphicsLayer{
                 alpha=(-scrollBehavior.state.contentOffset/48.dp.toPx()).coerceIn(0f,1f)
@@ -126,6 +129,7 @@ private data class Screen(val route:String):NavKey
             pageStates.SaveableStateProvider(route){Column(Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection)
                 .verticalScroll(rememberScrollState()).padding(top=padding.calculateTopPadding(),bottom=padding.calculateBottomPadding())
                 .padding(horizontal=16.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){
+                CompositionLocalProvider(LocalMenuBackdrop provides backdrop){
                 when(route){
                     "tab0"->{
                         FrameworkStatusCard()
@@ -166,7 +170,7 @@ private data class Screen(val route:String):NavKey
                             BasicComponent(title="ROM Maintainer",summary="Kien Vu")
                         }
                         Group("Giao diện"){
-                            OverlayDropdownPreference(items=listOf("Theo hệ thống","Sáng","Tối"),selectedIndex=(store.values["manager.theme"]?:"0").toInt(),title="Chế độ màu",onSelectedIndexChange={store.set("manager.theme",it.toString())})
+                            GlassDropdownPreference(items=listOf("Theo hệ thống","Sáng","Tối"),selectedIndex=(store.values["manager.theme"]?:"0").toInt(),title="Chế độ màu",onSelectedIndexChange={store.set("manager.theme",it.toString())})
                         }
                         Group("Dự án"){
                             ArrowPreference(title="Mã nguồn Manager",summary="GitHub · Kien Vu",onClick={context.startActivity(Intent(Intent.ACTION_VIEW,Uri.parse("https://github.com/kienvu020404-design/MixiFramework-Manager")))})
@@ -206,6 +210,7 @@ private data class Screen(val route:String):NavKey
                     }
                 }
                 Spacer(Modifier.height(24.dp))
+                }
             }}
         }
         if(detail.isEmpty()){
@@ -242,7 +247,7 @@ private data class Screen(val route:String):NavKey
     val current=store.value(option)
     when(option.kind){
         "bool"->SwitchPreference(title=option.title,checked=current=="true",onCheckedChange={store.set(option.key,it.toString())})
-        "choice"->OverlayDropdownPreference(items=option.labels,selectedIndex=option.values.indexOf(current).coerceAtLeast(0),title=option.title,onSelectedIndexChange={store.set(option.key,option.values[it])})
+        "choice"->GlassDropdownPreference(items=option.labels,selectedIndex=option.values.indexOf(current).coerceAtLeast(0),title=option.title,onSelectedIndexChange={store.set(option.key,option.values[it])})
         "range","time"->{
             var draft by remember(option.key,current){mutableFloatStateOf(current.toFloat())}
             SliderPreference(title=option.title,value=draft,valueRange=option.min.toFloat()..option.max.toFloat(),valueText="${draft.toInt()}${option.unit}",onValueChange={draft=it;onPreviewChange?.invoke(option.key,it.toInt().toString())},onValueChangeFinished={
