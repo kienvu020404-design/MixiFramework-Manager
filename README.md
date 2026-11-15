@@ -1,6 +1,6 @@
 # Mixi Framework Manager
 
-Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA**, pinned to 0.9.4. Android15+ / targetAndroid17. Package `com.mixi.manager`, UI milestone `0.7.2-ui`.
+Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA**, pinned to 0.9.4. Android15+ / targetAndroid17. Package `com.mixi.manager`, UI milestone `0.8.0-ui`.
 
 ## Implemented
 
@@ -21,6 +21,12 @@ Standalone Android UI built with Kotlin, Jetpack Compose and **Miuix by YuKongA*
 The Soft Glass page includes a static locally drawn scene and a Miuix sample panel. The sample sits immediately below the master switch; all blur/background/opacity/reflection sliders follow underneath. Slider drafts update the illustration during dragging, while local preferences save on release. The master switch returns the sample to a neutral panel when off. There is no continuous wallpaper animation or extra network/image dependency.
 
 This preview is deliberately a **UI illustration**, not the HyperOS material renderer. Parameters are mapped for visual feedback only and do not promise pixel parity with notifications/Control Center. Exact material rendering and authenticated system configuration remain deferred. Nothing is applied to the framework by this preview.
+
+## HyperImmersive and Island UI
+
+HyperImmersive has its own page with version/status placeholders, StandBy and blurred-background switches, numeric idle/off fields, seconds/minutes menus and a zero-time warning. Times are stored in seconds in the existing local preview keys; invalid inputs are not committed. Preview StandBy remains explicitly unavailable until runtime integration.
+
+Lockscreen SuperIsland uses the original HMC-Enhanced IslandDemo WebP assets, unchanged: choosing ColorOS or HyperOS switches the correct animation. The upstream ImageDecoder/ImageView approach is retained, with decoding off the UI thread and lifecycle-aware start/stop. Assets and source attribution are recorded in NOTICE.md; this is UI demo reuse, not a feature-runtime port.
 
 ## Boundary
 

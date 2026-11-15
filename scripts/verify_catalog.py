@@ -37,3 +37,11 @@ assert 'isFirst=false,isLast=false' in popup
 assert 'propagateMinConstraints=true' in popup
 assert 'enableWindowDim=false' in popup and 'noiseCoefficient=0f' in popup
 print('CONSISTENT_POPUP_INSETS_AND_ROW_POLICY_PASS')
+
+import hashlib
+for filename,expected in {
+ 'island_demo_coloros.webp':'7b1691ac0d17379dfcb3eb860658b456578373d339039f9a30a2a8caddc6e091',
+ 'island_demo_hyperos.webp':'95990cf1192644abe51f4f9714a7fc589e205e515040fc4093dd97b470d2d9fc',
+}.items():
+ assert hashlib.sha256((root/'app/src/main/res/raw'/filename).read_bytes()).hexdigest()==expected
+print('ORIGINAL_ENHANCED_ISLAND_ASSETS_PASS')

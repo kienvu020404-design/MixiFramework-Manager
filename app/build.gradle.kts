@@ -3,7 +3,7 @@ android {
  namespace = "com.mixi.manager"
  compileSdk { version = release(37) }
  buildToolsVersion = "37.0.0"
- defaultConfig { applicationId = "com.mixi.manager"; minSdk = 35; targetSdk = 37; versionCode = 10; versionName = "0.7.2-ui" }
+ defaultConfig { applicationId = "com.mixi.manager"; minSdk = 35; targetSdk = 37; versionCode = 11; versionName = "0.8.0-ui" }
  buildFeatures { compose = true; buildConfig = true }
  buildTypes {
   getByName("release") {
@@ -18,6 +18,8 @@ android {
 kotlin { jvmToolchain(21); compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21) } }
 dependencies {
  implementation("androidx.activity:activity-compose:1.13.0")
+ implementation("androidx.lifecycle:lifecycle-runtime-compose:2.11.0")
+ implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
  implementation("top.yukonga.miuix.kmp:miuix-ui-android:0.9.4")
  implementation("top.yukonga.miuix.kmp:miuix-preference-android:0.9.4")
  implementation("top.yukonga.miuix.kmp:miuix-icons-android:0.9.4")

@@ -194,8 +194,10 @@ private data class Screen(val route:String):NavKey
                         BasicComponent(title="Kotlin & Jetpack Compose",summary="Apache-2.0")
                     }
                     "appearance"->SoftGlassPage(store)
+                    "immersive"->HyperImmersivePage(store)
                     else->{
                         PreviewNote()
+                        if(route=="island")IslandDemo(colorOs=(store.values["mini.pillStyle"]?:"0")=="0")
                         val controls=store.byPage[route].orEmpty()
                         controls.groupBy { option ->
                             when(route){
