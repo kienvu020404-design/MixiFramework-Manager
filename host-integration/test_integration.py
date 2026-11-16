@@ -104,9 +104,11 @@ print("NO_SOURCE_LINK_NO_UNUSED_PROBE_APPLY_AND_READ_LIFECYCLE_SOURCE_PASS")
 assert 'title="Framework",summary=frameworkVersion' in main
 assert 'getPackageInfo("com.mixi.host",0).versionName' in main
 assert 'withContext(Dispatchers.IO)' in main
-assert 'versionName="1.0.5"' in manifest and 'versionCode="100500"' in manifest
+assert 'versionName="1.0.6"' in manifest and 'versionCode="100600"' in manifest
 with zipfile.ZipFile(out/'MixiHost-UI-Test.apk') as host:
  pins=dict(line.split('=',1) for line in host.read('META-INF/mixi/pins/settings.properties').decode().splitlines() if '=' in line)
- assert pins['frameworkVersion']=='1.0.5'
+ assert pins['frameworkVersion']=='1.0.6'
  assert 'public void before(HookRegistry.Call call)' not in extension[extension.index('"mixi-header-icon"'):extension.index('Method click=')]
 print('MANAGER_FRAMEWORK_VERSION_PAIRING_ACCEPTED_ICON_PATH_PASS')
+
+assert 'Bật chức năng này có thể tăng nhẹ điện năng tiêu thụ' in main

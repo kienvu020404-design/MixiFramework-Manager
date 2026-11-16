@@ -340,7 +340,7 @@ private data class Screen(val route:String):NavKey
 @Composable internal fun OptionRow(option:Option,store:UiStore,onPreviewChange:((String,String)->Unit)?=null){
     val current=store.value(option)
     when(option.kind){
-        "bool"->SwitchPreference(title=option.title,checked=current=="true",onCheckedChange={store.set(option.key,it.toString())})
+        "bool"->SwitchPreference(title=option.title,summary=if(option.key=="appearance.gestureMotion")"Bật chức năng này có thể tăng nhẹ điện năng tiêu thụ" else null,checked=current=="true",onCheckedChange={store.set(option.key,it.toString())})
         "choice"->GlassDropdownPreference(items=option.labels,selectedIndex=option.values.indexOf(current).coerceAtLeast(0),title=option.title,onSelectedIndexChange={store.set(option.key,option.values[it])})
         "range","time"->{
             var draft by remember(option.key,current){mutableFloatStateOf(current.toFloat())}

@@ -91,11 +91,11 @@ parts['META-INF/mixi/modules/settings.jar']=settings.read_bytes()
 pin='META-INF/mixi/pins/settings.properties'
 metadata=dict(line.split('=',1) for line in parts[pin].decode().splitlines() if '=' in line)
 metadata['extensionSha256']=sha(settings.read_bytes())
-metadata['buildId']='framework-1.0.5-manager-1.0.0-test'
-metadata['frameworkVersion']='1.0.5'
+metadata['buildId']='framework-1.0.6-manager-1.0.0-test'
+metadata['frameworkVersion']='1.0.6'
 parts[pin]=''.join(k+'='+v+'\n' for k,v in metadata.items()).encode()
 manifest=(root/'out/v104/AndroidManifest.xml').read_text(encoding='utf-8')
-manifest=manifest.replace('100400','100500').replace('android:versionName="1.0.4"','android:versionName="1.0.5"')
+manifest=manifest.replace('100400','100600').replace('android:versionName="1.0.4"','android:versionName="1.0.6"')
 manifest=manifest.replace('<application ','<application android:appComponentFactory="mixi.host.ui.HostUiFactory" android:allowBackup="false" ')
 manifest=manifest.replace('</application>','<activity android:name="com.mixi.manager.MainActivity" android:exported="true" android:process=":manager" android:theme="@android:style/Theme.Material.NoActionBar" /></application>')
 (out/'AndroidManifest.xml').write_text(manifest,encoding='utf-8')
