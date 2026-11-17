@@ -112,3 +112,9 @@ with zipfile.ZipFile(out/'MixiHost-UI-Test.apk') as host:
 print('MANAGER_FRAMEWORK_VERSION_PAIRING_ACCEPTED_ICON_PATH_PASS')
 
 assert 'Bật chức năng này có thể tăng nhẹ điện năng tiêu thụ' in main
+
+assert 'ViewModelProvider(this' in main and 'ManagerState(applicationContext)' in main
+assert 'UiStore(context.applicationContext,viewModelScope)' in main
+assert 'drafts.remove(key)' in preview and 'onPreviewChange?.invoke(option.key,null)' in main
+assert 'requireTime(requestDeadline)' in bridge and 'Math.min(requestDeadline' in bridge
+print('SIXFIX_VIEWMODEL_PREVIEW_AND_REQUEST_DEADLINE_SOURCE_CONTRACT_PASS')

@@ -35,12 +35,8 @@ import androidx.compose.ui.unit.IntRect
 import kotlin.math.roundToInt
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-internal fun standbySeconds(text:String,minutes:Boolean,maximum:Int):Int? {
-    val number=text.toLongOrNull()?:return null
-    if(number<0||number>maximum)return null
-    val seconds=number*(if(minutes)60 else 1)
-    return seconds.takeIf{it==0L||it in 10L..maximum.toLong()}?.toInt()
-}
+internal fun standbySeconds(text:String,minutes:Boolean,maximum:Int):Int? =
+    StandbyTimeValue.parse(text,minutes,maximum)
 
 @Composable internal fun HyperImmersivePage(store:UiStore){
     val lifecycle=LocalLifecycleOwner.current.lifecycle
@@ -72,7 +68,7 @@ internal fun standbySeconds(text:String,minutes:Boolean,maximum:Int):Int? {
 @Composable private fun StandbyTimeRow(field:Option,store:UiStore,enabled:Boolean,title:String,summary:String){
     val stored=store.value(field).toIntOrNull()?:field.initial.toInt()
     var minutes by remember(field.key){mutableStateOf(stored%60==0)}
-    var text by remember(field.key,stored,minutes){mutableStateOf((if(minutes)stored/60 else stored).toString())}
+    var text by remember(field.key,stored,minutes){mutableStateOf(StandbyTimeValue.display(stored,minutes))}
     var focused by remember{mutableStateOf(false)}
     var showUnits by remember{mutableStateOf(false)}
     var unitBounds by remember{mutableStateOf<IntRect?>(null)}
@@ -80,16 +76,19 @@ internal fun standbySeconds(text:String,minutes:Boolean,maximum:Int):Int? {
     val colors=MiuixTheme.colorScheme
     val shape=RoundedCornerShape(10.dp)
     val parsed=standbySeconds(text,minutes,field.max)
+    var edited by remember(field.key){mutableStateOf(false)}
     fun settle(){
+        if(!edited)return
+        edited=false
         if(parsed!=null)store.set(field.key,parsed.toString())
-        else text=(if(minutes)stored/60 else stored).toString()
+        else text=StandbyTimeValue.display(stored,minutes)
     }
-    LaunchedEffect(stored){if(!focused){minutes=stored%60==0;text=(if(minutes)stored/60 else stored).toString()}}
+    LaunchedEffect(stored){if(!focused){minutes=stored%60==0;text=StandbyTimeValue.display(stored,minutes)}}
     BasicComponent(title=title,summary=summary,enabled=enabled,endActions={
         Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(6.dp)){
-            BasicTextField(value=text,onValueChange={text=it.filter(Char::isDigit).take(5)},singleLine=true,enabled=enabled,
+            BasicTextField(value=text,onValueChange={text=it.filter{character->character.isDigit()||character=='.'||character==','}.take(16);edited=true},singleLine=true,enabled=enabled,
                 textStyle=TextStyle(color=if(text.isNotEmpty()&&parsed==null)Color(0xFFD64545) else colors.onSurface,fontSize=15.sp,textAlign=TextAlign.Center),
-                cursorBrush=SolidColor(colors.primary),keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Number,imeAction=ImeAction.Done),
+                cursorBrush=SolidColor(colors.primary),keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Decimal,imeAction=ImeAction.Done),
                 keyboardActions=KeyboardActions(onDone={settle();focus.clearFocus()}),
                 modifier=Modifier.width(64.dp).clip(shape).background(colors.secondaryContainer).padding(vertical=10.dp)
                     .onFocusChanged{if(focused&&!it.isFocused)settle();focused=it.isFocused})
@@ -100,9 +99,9 @@ internal fun standbySeconds(text:String,minutes:Boolean,maximum:Int):Int? {
                 GlassChoicePopup(items=listOf("Giây","Phút"),selectedIndex=if(minutes)1 else 0,show=showUnits,
                     onDismiss={showUnits=false},anchor=unitBounds,minimumWidth=180.dp){index->
                     val nextMinutes=index==1
-                    val next=standbySeconds(text,minutes,field.max)?:stored
-                    minutes=nextMinutes;text=(if(minutes)(next+59)/60 else next).toString()
-                    standbySeconds(text,minutes,field.max)?.let{store.set(field.key,it.toString())}
+                    val next=stored
+                    minutes=nextMinutes;text=StandbyTimeValue.display(next,minutes)
+                    edited=false
                     showUnits=false
                 }
             }

@@ -24,17 +24,17 @@ public class ApplyTest {
    SharedPreferences prefs=new SharedPreferences();prefs.values.put("appearance.solidBattery","false");prefs.values.put("appearance.ccBatteryPercent","true");Context app=new Context();
    CountDownLatch entered=new CountDownLatch(1),release=new CountDownLatch(1);
    EnhancedProtocol.worker.submit(()->{entered.countDown();try{release.await();}catch(InterruptedException e){throw new RuntimeException(e);}});entered.await();
-   Future<?> apply=caller.submit(()->{try{applyExtensions(app,prefs);}catch(Exception e){throw new RuntimeException(e);}});
+   Future<?> apply=caller.submit(()->{try{applyExtensions(app,prefs,SystemClock.elapsedRealtime()+7500);}catch(Exception e){throw new RuntimeException(e);}});
    Thread.sleep(100);if(!app.events.isEmpty())throw new AssertionError("Applied before earlier drain");
    prefs.values.put("appearance.solidBattery","true");release.countDown();apply.get(3,TimeUnit.SECONDS);
    if(!app.events.equals(List.of("save:solidBattery=true","save:ccBatteryPercent=true","reload:com.android.systemui")))throw new AssertionError(app.events);
    Context failure=new Context();failure.fail=true;
-   try{applyExtensions(failure,prefs);throw new AssertionError("Expected failed save");}catch(ExecutionException expected){}
+   try{applyExtensions(failure,prefs,SystemClock.elapsedRealtime()+7500);throw new AssertionError("Expected failed save");}catch(ExecutionException expected){}
    if(failure.events.stream().anyMatch(e->e.startsWith("reload:")))throw new AssertionError("Reload after failed save");
    Context expired=new Context();CountDownLatch blocked=new CountDownLatch(1),resume=new CountDownLatch(1);
    EnhancedProtocol.worker.submit(()->{blocked.countDown();try{resume.await();}catch(Exception e){throw new RuntimeException(e);}});blocked.await();
    SystemClock.firstRead=new CountDownLatch(1);CountDownLatch clockRead=SystemClock.firstRead;
-   Future<?> expiry=caller.submit(()->{try{applyExtensions(expired,prefs);}catch(Exception expected){return;}throw new AssertionError("Expected expiry");});
+   Future<?> expiry=caller.submit(()->{try{applyExtensions(expired,prefs,SystemClock.elapsedRealtime()+7500);}catch(Exception expected){return;}throw new AssertionError("Expected expiry");});
    if(!clockRead.await(2,TimeUnit.SECONDS))throw new AssertionError("Apply did not start");SystemClock.offset=10000;resume.countDown();expiry.get(3,TimeUnit.SECONDS);
    if(!expired.events.isEmpty())throw new AssertionError("Expired Apply still wrote/reloaded");
    System.out.println("SOURCE_EXTRACTED_APPLY_SERIALIZATION_SAVE_FAILURE_EXPIRY_PASS");

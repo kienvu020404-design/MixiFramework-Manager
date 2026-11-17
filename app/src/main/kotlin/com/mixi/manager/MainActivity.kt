@@ -8,7 +8,9 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -104,7 +106,12 @@ class UiStore(private val context:Context,private val scope:CoroutineScope) {
             while(pending.isNotEmpty()){
                 val (next,requested)=pending.entries.first().toPair()
                 try{
-                    val reply=hostRequest(context,"change",next,requested)
+                    val reply=try{hostRequest(context,"change",next,requested)}catch(failure:Exception){
+                        if(failure is CancellationException&&failure !is TimeoutCancellationException)throw failure
+                        val actual=hostRequest(context,"query")
+                        if(actual.getBundle("values")?.getString(next)!=requested)throw failure
+                        actual
+                    }
                     if(pending[next]==requested)pending.remove(next)
                     accept(reply)
                 }catch(failure:Exception){
@@ -122,6 +129,10 @@ private val pages=linkedMapOf(
     "media.island" to "Media · SuperIsland", "lyrics" to "Lyrics", "dictionaries" to "Từ điển phiên âm",
     "island" to "Lockscreen SuperIsland", "extras" to "Tùy chỉnh bổ sung", "immersive" to "HyperImmersive",
     "appearance" to "Tùy chỉnh Soft Glass", "extensions" to "Tiện ích mở rộng")
+
+class ManagerState(context:Context):ViewModel(){
+    val store=UiStore(context.applicationContext,viewModelScope)
+}
 
 class MainActivity:ComponentActivity(){
     private lateinit var store:UiStore
@@ -142,7 +153,12 @@ class MainActivity:ComponentActivity(){
         if(BuildConfig.HOST_INTEGRATED)setTheme(R.style.Theme_Mixi)
         super.onCreate(savedInstanceState);enableEdgeToEdge()
         window.isNavigationBarContrastEnforced=false
-        store=UiStore(applicationContext,lifecycleScope)
+        store=ViewModelProvider(this,object:ViewModelProvider.Factory{
+            override fun <T:ViewModel> create(modelClass:Class<T>):T {
+                @Suppress("UNCHECKED_CAST")
+                return ManagerState(applicationContext) as T
+            }
+        })[ManagerState::class.java].store
         setContent {
             val appearance=store.values["manager.theme"]?:"0"
             val dark=when(appearance){"1"->false;"2"->true;else->isSystemInDarkTheme()}
@@ -337,7 +353,7 @@ private data class Screen(val route:String):NavKey
         Card(content=content)
     }
 }
-@Composable internal fun OptionRow(option:Option,store:UiStore,onPreviewChange:((String,String)->Unit)?=null){
+@Composable internal fun OptionRow(option:Option,store:UiStore,onPreviewChange:((String,String?)->Unit)?=null){
     val current=store.value(option)
     when(option.kind){
         "bool"->SwitchPreference(title=option.title,summary=if(option.key=="appearance.gestureMotion")"Bật chức năng này có thể tăng nhẹ điện năng tiêu thụ" else null,checked=current=="true",onCheckedChange={store.set(option.key,it.toString())})
@@ -345,6 +361,7 @@ private data class Screen(val route:String):NavKey
         "range","time"->{
             var draft by remember(option.key,current){mutableFloatStateOf(current.toFloat())}
             SliderPreference(title=option.title,value=draft,valueRange=option.min.toFloat()..option.max.toFloat(),valueText="${draft.toInt()}${option.unit}",onValueChange={draft=it;onPreviewChange?.invoke(option.key,it.toInt().toString())},onValueChangeFinished={
+                onPreviewChange?.invoke(option.key,null)
                 val value=draft.toInt();store.set(option.key,(if(option.kind=="time"&&value in 1..9)10 else value).toString())
             })
         }

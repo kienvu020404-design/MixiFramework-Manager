@@ -33,12 +33,12 @@ import top.yukonga.miuix.kmp.basic.Text
         amount("appearance.opacity",100f),amount("appearance.reflection",200f))
     Group("Độ mờ"){
         controls.filter{it.key in listOf("appearance.blur","appearance.background")}.forEach{
-            OptionRow(it,store){key,value->drafts[key]=value}
+            OptionRow(it,store){key,value->if(value==null)drafts.remove(key) else drafts[key]=value}
         }
     }
     Group("Vật liệu"){
         controls.filter{it.key in listOf("appearance.opacity","appearance.reflection")}.forEach{
-            OptionRow(it,store){key,value->drafts[key]=value}
+            OptionRow(it,store){key,value->if(value==null)drafts.remove(key) else drafts[key]=value}
         }
     }
 }

@@ -1,0 +1,21 @@
+{
+  "baselineModule": "out/Mixi-v1.0.6-Final-Test.zip",
+  "baselineModuleSha256": "4ba2fc467cef476fd4802a03387d46e2e3209f3ce426fcc6a0b8c93e85ab039f",
+  "baselineBridgeSha256": "a73b102450a289d4c8477b731263a0aea0feb99e8ed63868c5bf8925e54a9291",
+  "candidateBridge": "out/v09/apk-restart/extension.jar",
+  "candidateBridgeSha256": "e0f2636859b430fb9ba027fd08a38587232854c5ee34d27919a7b6741ecaa40e",
+  "sourceSha256": {
+    "rom-integration/v102/java/mixi/hypermodifier/Api102.java": "a3307f91a3fe5c25b18a8ad0071755fe01a950eff52a5bf5a0fc3482c4682fc7",
+    "rom-integration/v102/java/mixi/hypermodifier/ExtensionLoader.java": "31a28279597d32926424e8d0fd2bde5f975eb6f6ad8e229c48a2c1d0e464f82a",
+    "rom-integration/v103-apk/java/mixi/hypermodifier/Bootstrap.java": "e6899194b217ff92ceb751a9be64ce41f1b3a02e9f5a7cc11489f173ed24d15b",
+    "rom-integration/v103-apk/java/mixi/hypermodifier/GlassEntryGuard.java": "d6d82579066fa65f87bf35e77b2fc82667f978797ccc7899364feebb7419ec3a",
+    "rom-integration/v103-apk/java/mixi/hypermodifier/GlassPreferences.java": "cf1c10f0f06d7e5ddf866326204ab02e147571650c8e199ed9a304e7e386d677",
+    "rom-integration/v103-apk/java/mixi/hypermodifier/LiveGlass.java": "c833ba5859569c62a7ffdf4c75b7d1fe8f224d6a0abaa6df923b73dbb54fb250",
+    "rom-integration/v103-apk/java/mixi/hypermodifier/MonitorVisibility.java": "98c2aa86c57386eb3f21c19dd564ccc25d76fb87a03bc3d06554622b1c79a8d7",
+    "rom-integration/v103-apk/java/mixi/hypermodifier/NavigationWindowPolicy.java": "3d520b490e5efdf2fd11bae772adfdccf7d0bf65b4cd5a834117a8c10eaf68cc",
+    "rom-integration/v103-apk/java/mixi/hypermodifier/OriginalFeatures.java": "7f85f3d3f05c84c5b614254cea02d88e4e137f3b9c44664cb58d2875bd106ac3",
+    "rom-integration/v103-apk/java/mixi/hypermodifier/OriginalMonitorVisibility.java": "72e350ab504359315dd79f8196dd0da67aa783fbdd335c4d42d4247699822fad",
+    "rom-integration/v103-apk/java/mixi/hypermodifier/RomInputBridge.java": "bd1a5e983365fc1ed951605df8a340c54d1a47c7caef04bb482b7bf7b95a92c9"
+  },
+  "verification": "Native ART normal/missing/partial/protection and shared-HMC rollback PASS; installedSystemUI/game lifecycle pending"
+}

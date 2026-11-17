@@ -22,6 +22,7 @@ public final class ManagerBridge {
                     String op = intent.getStringExtra("op");
                     String key = intent.getStringExtra("key"), value = intent.getStringExtra("value");
                     validate(op,key,value);
+                    final long requestDeadline=SystemClock.elapsedRealtime()+7500;
                     PendingResult result = goAsync();
                     java.util.concurrent.atomic.AtomicBoolean finished = new java.util.concurrent.atomic.AtomicBoolean();
                     Handler main = new Handler(Looper.getMainLooper());
@@ -30,17 +31,20 @@ public final class ManagerBridge {
                     try { requests.execute(() -> {
                         Bundle reply; int code;
                         try {
+                            requireTime(requestDeadline);
+                            if(finished.get())throw new IllegalStateException("Request expired");
                             android.content.SharedPreferences saved = app.getSharedPreferences("mixi_enhanced_r1",Context.MODE_PRIVATE);
                             if ("previewAssets".equals(op)) {
                                 reply = previewAssets(app); code = 1;
                             } else {
+                            requireTime(requestDeadline);
                             if ("change".equals(op)) {
-                                if (key.equals("enhanced.master")) master(app,Boolean.parseBoolean(value));
+                                if (key.equals("enhanced.master")) master(app,Boolean.parseBoolean(value),requestDeadline);
                                 else {
                                     if (!saved.edit().putString(key,value).commit()) throw new IllegalStateException("Configuration not saved");
                                     EnhancedProtocol.changed(app,saved,key,value);
                                 }
-                            } else if ("applyExtensions".equals(op)) applyExtensions(app,saved);
+                            } else if ("applyExtensions".equals(op)) applyExtensions(app,saved,requestDeadline);
                             else if ("preview".equals(op)) ImmersiveClient.call(app,"preview",null);
                             else if ("query".equals(op)) EnhancedProtocol.replay(app,saved);
                             reply = snapshot(app,saved,"immersiveQuery".equals(op)); code = 1;
@@ -66,9 +70,12 @@ public final class ManagerBridge {
             if (field.key.equals(key) && field.accepts(value)) return;
         throw new IllegalArgumentException("Unknown setting/value");
     }
-    private static void applyExtensions(Context app,android.content.SharedPreferences saved) throws Exception {
+    private static void requireTime(long deadline) {
+        if(SystemClock.elapsedRealtime()>=deadline)throw new IllegalStateException("Request expired");
+    }
+    private static void applyExtensions(Context app,android.content.SharedPreferences saved,long requestDeadline) throws Exception {
         // Run after the existing drain, including its failure path, before reloading SystemUI.
-        final long deadline=SystemClock.elapsedRealtime()+5500;
+        final long deadline=Math.min(requestDeadline,SystemClock.elapsedRealtime()+5500);
         java.util.concurrent.Future<?> action=EnhancedProtocol.worker.submit(() -> {
             for(String key:new String[]{"appearance.solidBattery","appearance.ccBatteryPercent"}) {
                 if(SystemClock.elapsedRealtime()>=deadline)throw new IllegalStateException("Apply expired");
@@ -84,7 +91,7 @@ public final class ManagerBridge {
             app.sendBroadcast(new Intent("com.mixi.host.MASTER_RELOAD").setPackage("com.android.systemui")
                 .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),null,options.toBundle());
         });
-        try{action.get(6,java.util.concurrent.TimeUnit.SECONDS);}
+        try{action.get(Math.max(1,deadline-SystemClock.elapsedRealtime()),java.util.concurrent.TimeUnit.MILLISECONDS);}
         catch(java.util.concurrent.TimeoutException expired){action.cancel(false);throw expired;}
     }
     private static Bundle previewAssets(Context app) throws Exception {
@@ -104,10 +111,12 @@ public final class ManagerBridge {
         if(recipe==null||recipe.length!=42)throw new IllegalStateException("Glass recipe mismatch");
         result.putFloatArray("recipe",recipe);return result;
     }
-    private static void master(Context app,boolean enabled) {
+    private static void master(Context app,boolean enabled,long deadline) {
+        requireTime(deadline);
         Bundle edit = new Bundle(); edit.putBoolean("enabled",enabled);
         Bundle reply = app.getContentResolver().call(Uri.parse("content://com.mixi.host.master"),"set",null,edit);
         if (reply == null || !reply.getBoolean("saved")) throw new IllegalStateException("Master save failed");
+        // Finish all reload notifications once the master value is persisted.
         for (String target : new String[]{"com.android.systemui","com.miui.miwallpaper","com.miui.aod"}) {
             BroadcastOptions options = BroadcastOptions.makeBasic(); options.setShareIdentityEnabled(true);
             app.sendBroadcast(new Intent("com.mixi.host.MASTER_RELOAD").setPackage(target)
