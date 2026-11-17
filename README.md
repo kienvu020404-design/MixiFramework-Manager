@@ -78,3 +78,6 @@ Project-source UI link removed; license credits retained. No unused Home HMC/Imm
 
 ## Manager1.0.0 / Framework1.0.5 test
 Only versions and Info display changed from0.9.4, plus restoration of the accepted Settings icon path. Info displays Manager BuildConfig version and actual installed Host version queried off main thread. Host manifest, module.prop and embedded settings metadata all report1.0.5. No original Settings APK/ART/compiler-cache change. The SettingsOpt experiment did not show a launch improvement and is rejected; see SETTINGS-BENCHMARK.json. Test: Mixi-v1.0.5-Manager-1.0.0-Test.zip. Manual installation and visual acceptance pending.
+
+## Framework1.0.7 / Manager1.0.1
+Six fixes are included in the versioned ROM handoff. From full ROM1.0.6 replace Host APK and mixi-hypermodifier.jar only. Original HMC/native/framework import payloads unchanged. Installed SixFix bridge was measured on the device; versioned Host and fresh ROM flash still need acceptance.

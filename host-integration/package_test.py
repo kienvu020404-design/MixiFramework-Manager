@@ -18,21 +18,22 @@ with zipfile.ZipFile(baseline) as z:parts={n:z.read(n) for n in z.namelist()}
 bridge='system/framework/mixi-hypermodifier.jar'
 assert sha(parts[bridge])==contract['baselineBridgeSha256']
 host='system/system_ext/priv-app/MixiHost/MixiHost.apk';old=parts.copy();parts[host]=apk;parts[bridge]=candidate
-parts['module.prop']=parts['module.prop'].decode().replace('version=1.0.6','version=1.0.6-SixFix-Test').replace('name=Mixi Framework 1.0.6 - Final Test','name=Mixi Framework 1.0.6 - Six Fix Test').encode()
-parts['HUONG-DAN.txt']=('Mixi 1.0.6 / Manager1.0.0 - SixFix Test\n'
+parts['module.prop']=parts['module.prop'].decode().replace('version=1.0.6','version=1.0.7').replace('name=Mixi Framework 1.0.6 - Final Test','name=Mixi Framework 1.0.7').encode()
+parts['module.prop']=parts['module.prop'].decode().replace('versionCode=100600','versionCode=100700').encode()
+parts['HUONG-DAN.txt']=('Mixi 1.0.7 / Manager1.0.1 - SixFix Test\n'
  'Sửa sáu mục: đóng đúng bridge đã kiểm thử; deadline request; ViewModel giữ hàng đợi qua xoay Activity; draft Glass được xóa khi thả; đổi đơn vị thời gian giữ giây; gesture thiếu API/cài lỗi tắt trọn nhóm.\n'
  'Cài ZIP qua quản lý module rồi reboot thủ công. Không cài riêng Host, không xóa data.\n'
  'Đã kiểm tra ART cô lập normal/missing/partial/protection và callback rollback với HMC. Cần nghiệm thu UI xoay máy, lưu/timeout và game→Home thật sau cài.\n'
  'Gesture không fallback sang monitor thiếu bảo vệ. Kiểm tra trong game thanh ẩn thì monitor dừng và về Home khôi phục.\n'
  'Rollback: Mixi-v1.0.6-Final-Test.zip. Giữ bản ROM1.0.6 đã phát hành đến khi nghiệm thu.\n').encode()
 parts['SHA256SUMS']=''.join(sha(b)+'  '+n+'\n' for n,b in parts.items() if n.startswith('system/')).encode()
-artifact=root/'out/Mixi-v1.0.6-SixFix-Test.zip'
+artifact=root/'out/Mixi-v1.0.7-Manager-1.0.1-Test.zip'
 with zipfile.ZipFile(artifact,'w',zipfile.ZIP_DEFLATED) as z:
  for n,b in parts.items():z.writestr(n,b)
 with zipfile.ZipFile(artifact) as z:
  assert z.testzip() is None
- assert 'version=1.0.6' in z.read('module.prop').decode()
- assert 'versionCode=100600' in z.read('module.prop').decode()
+ assert 'version=1.0.7' in z.read('module.prop').decode()
+ assert 'versionCode=100700' in z.read('module.prop').decode()
  assert z.read('customize.sh')==old['customize.sh']
  assert sha(z.read(bridge))==contract['candidateBridgeSha256']
  for n,b in old.items():
